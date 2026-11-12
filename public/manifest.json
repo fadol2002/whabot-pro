@@ -1,0 +1,19 @@
+{
+  "name": "WhaBot Pro — Assistant WhatsApp IA",
+  "short_name": "WhaBot Pro",
+  "description": "Créez, configurez et gérez votre assistant WhatsApp IA autonome 24h/24.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#080f14",
+  "theme_color": "#25D366",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
