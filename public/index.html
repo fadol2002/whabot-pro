@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#25D366">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WhaBot Pro">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <title>WhaBot Pro — Plateforme SaaS d'Assistants WhatsApp IA</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    :root {
+      --green: #25D366;
+      --green-dark: #128C7E;
+      --green-glow: rgba(37, 211, 102, 0.14);
+      --bg: #080f14;
+      --sidebar: #0d171e;
+      --card: #111b21;
+      --card-hover: #16232b;
+      --border: #1f2c34;
+      --text: #e9edef;
+      --muted: #8696a0;
+      --input-bg: #182229;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+    /* ── VISIBILITÉ DES PAGES (FIX STRICT) ── */
+    .view-screen { display: none !important; }
+    .view-screen.active { display: flex !important; }
+
+    /* ── ÉCRAN AUTHENTIFICATION ── */
+    #screen-auth {
+      min-height: 100vh;
+      width: 100%;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: radial-gradient(circle at top right, #128c7e22, transparent 45%),
+                  radial-gradient(circle at bottom left, #25d36615, transparent 45%),
+                  var(--bg);
+    }
+    .auth-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 40px 36px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    }
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green-glow);
+      border: 1px solid #25d36644;
+      color: var(--green);
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .auth-box h1 { font-size: 28px; color: var(--text); margin-bottom: 6px; }
+    .auth-box h1 span { color: var(--green); }
+    .auth-box p.sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
+    .auth-tabs { display: flex; gap: 8px; margin-bottom: 22px; background: var(--input-bg); padding: 5px; border-radius: 12px; border: 1px solid var(--border); }
+    .auth-tab { flex: 1; padding: 10px; border: none; border-radius: 8px; background: transparent; color: var(--muted); font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; }
+    .auth-tab.active { background: var(--green); color: #06130d; }
+
+    /* ── ÉCRAN APPLICATION DASHBOARD (SIDEBAR + CONTENU) ── */
+    #screen-app {
+      min-height: 100vh;
+      width: 100%;
+      flex-direction: row;
+    }
+    .sidebar {
+      width: 265px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 22px 16px;
+      flex-shrink: 0;
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 21px;
+      font-weight: 800;
+      padding: 6px 12px 22px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 18px;
+    }
+    .sidebar-logo span { color: var(--green); }
+    .pro-pill {
+      font-size: 10px;
+      background: var(--green);
+      color: #051b11;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .nav-menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.18s;
+    }
+    .nav-item:hover { background: var(--card); color: var(--text); }
+    .nav-item.active {
+      background: var(--green-glow);
+      border-color: #25d36644;
+      color: var(--green);
+      font-weight: 600;
+    }
+    .sidebar-footer {
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      margin-top: 16px;
+    }
+    .user-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card);
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+    .user-chip-info { overflow: hidden; }
+    .user-chip-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-chip-plan { font-size: 11px; color: var(--green); }
+
+    /* ── ZONE CONTENU PRINCIPAL ── */
+    .main-area {
+      flex: 1;
+      padding: 28px 34px;
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+    .tab-pane { display: none; max-width: 1040px; margin: 0 auto; }
+    .tab-pane.active { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .page-header h2 { font-size: 22px; font-weight: 700; }
+    .page-header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+    /* ── CARTES & GRILLES ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .stat-card .stat-top { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+    .stat-card .stat-val { font-size: 28px; font-weight: 800; color: var(--text); }
+    .stat-card .stat-sub { font-size: 12px; color: var(--green); margin-top: 6px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .card p.card-desc { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+
+    /* ── FORMULAIRES & BOUTONS ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { margin-bottom: 16px; }
+    label { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 6px; }
+    input, textarea, select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--green); }
+    textarea { resize: vertical; line-height: 1.5; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 20px;
+      background: var(--green);
+      color: #051b11;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: #1ebe5d; transform: translateY(-1px); }
+    .btn-block { width: 100%; }
+    .btn-outline { background: transparent; border: 1px solid var(--green); color: var(--green); }
+    .btn-outline:hover { background: var(--green-glow); color: var(--green); }
+    .btn-secondary { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); }
+    .btn-secondary:hover { border-color: var(--muted); background: var(--card-hover); }
+    .btn-danger { background: #ef444422; border: 1px solid #ef444466; color: #f87171; }
+    .btn-danger:hover { background: #ef444433; }
+
+    .msg { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: none; font-weight: 500; }
+    .msg.error { background: #ef444422; border: 1px solid #ef444466; color: #f87171; display: block; }
+    .msg.success { background: var(--green-glow); border: 1px solid #25d36666; color: var(--green); display: block; }
+
+    /* ── BADGES STATUT ── */
+    .status-badge { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 99px; font-size: 13px; font-weight: 600; }
+    .status-badge.connected { background: var(--green-glow); color: var(--green); border: 1px solid #25d36655; }
+    .status-badge.disconnected { background: #ef44441a; color: #f87171; border: 1px solid #ef444444; }
+    .status-badge.waiting { background: #f59e0b1a; color: #fbbf24; border: 1px solid #f59e0b44; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+    /* ── TEMPLATES MÉTIERS ── */
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .template-btn {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .template-btn:hover { border-color: var(--green); background: var(--green-glow); }
+    .template-btn .t-icon { font-size: 20px; margin-bottom: 6px; display: block; }
+    .template-btn .t-title { font-size: 13px; font-weight: 700; display: block; }
+    .template-btn .t-sub { font-size: 11px; color: var(--muted); }
+
+    /* ── SIMULATEUR LIVE (PLAYGROUND WHATSAPP) ── */
+    .playground-wrap {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 20px;
+    }
+    .wa-chat-box {
+      background: #0b141a;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      height: 520px;
+      overflow: hidden;
+    }
+    .wa-header {
+      background: #202c33;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .wa-header-left { display: flex; align-items: center; gap: 12px; }
+    .wa-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--green); color: #051b11;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 18px;
+    }
+    .wa-messages {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background-image: radial-gradient(#1f2c34 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .wa-bubble {
+      max-width: 78%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+    .wa-bubble.user {
+      align-self: flex-end;
+      background: #005c4b;
+      color: #e9edef;
+      border-bottom-right-radius: 3px;
+    }
+    .wa-bubble.bot {
+      align-self: flex-start;
+      background: #202c33;
+      color: #e9edef;
+      border-bottom-left-radius: 3px;
+      border: 1px solid #2a3942;
+    }
+    .wa-input-bar {
+      background: #202c33;
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .wa-input-bar input {
+      background: #2a3942;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: var(--text);
+    }
+
+    /* ── MINI-CRM & MESSAGERIE LIVE ── */
+    .crm-layout {
+      display: grid;
+      grid-template-columns: 310px 1fr;
+      gap: 18px;
+      height: 560px;
+    }
+    .crm-list-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .crm-list-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .crm-contacts { flex: 1; overflow-y: auto; }
+    .crm-contact-item {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .crm-contact-item:hover, .crm-contact-item.active { background: var(--input-bg); }
+    .crm-contact-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .crm-contact-phone { font-weight: 700; font-size: 13.5px; color: var(--text); }
+    .crm-contact-preview { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── SWITCH TOGGLE ── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    .toggle-row-title { font-size: 14px; font-weight: 600; }
+    .toggle-row-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .switch { position: relative; display: inline-block; width: 46px; height: 25px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #2a3942; transition: .2s; border-radius: 25px; }
+    .slider:before { position: absolute; content: ""; height: 19px; width: 19px; left: 3px; bottom: 3px; background-color: white; transition: .2s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--green); }
+    input:checked + .slider:before { transform: translateX(21px); }
+
+    /* ── PLANS TARIFAIRES ── */
+    .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+    .plan-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+    .plan-card.popular { border-color: var(--green); background: linear-gradient(180deg, #25d36612 0%, var(--card) 100%); }
+    .popular-tag {
+      position: absolute; top: -11px; right: 18px;
+      background: var(--green); color: #051b11;
+      font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 99px;
+    }
+    .plan-price { font-size: 28px; font-weight: 800; color: var(--green); margin: 10px 0 14px; }
+    .plan-price small { font-size: 13px; color: var(--muted); font-weight: 500; }
+    .plan-features { list-style: none; font-size: 13px; color: var(--text); line-height: 2.1; margin-bottom: 20px; }
+    .plan-features li::before { content: "✓ "; color: var(--green); font-weight: 800; }
+
+    @media (max-width: 860px) {
+      #screen-app { flex-direction: column; }
+      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding: 14px; }
+      .nav-menu { flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
+      .nav-item { white-space: nowrap; }
+      .form-grid, .playground-wrap, .crm-layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- =========================================================
+     ÉCRAN 1 : CONNEXION & CRÉATION DE COMPTE
+     ========================================================= -->
+<div id="screen-auth" class="view-screen active">
+  <div class="auth-box">
+    <div style="text-align:center;">
+      <span class="brand-badge">⚡ Plateforme IA WhatsApp N°1</span>
+      <h1>Wha<span>Bot</span> Pro 🤖</h1>
+      <p class="sub">Créez et connectez votre assistant IA commercial ou personnel sur WhatsApp en 2 minutes.</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-btn-login" onclick="switchAuthTab('login')">Connexion</button>
+      <button class="auth-tab" id="tab-btn-register" onclick="switchAuthTab('register')">Créer un compte</button>
+    </div>
+
+    <div id="auth-alert" class="msg"></div>
+
+    <!-- Formulaire Login -->
+    <div id="form-login">
+      <div class="form-group">
+        <label>Adresse Email</label>
+        <input type="email" id="login-email" placeholder="exemple@entreprise.com">
+      </div>
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <button class="btn btn-block" onclick="doLogin()">Se connecter à mon espace →</button>
+    </div>
+
+    <!-- Formulaire Inscription -->
+    <div id="form-register" style="display:none;">
+      <div class="form-group">
+        <label>Votre prénom / nom</label>
+        <input type="text" id="reg-name" placeholder="Ex: Fadol">
+      </div>
+      <div class="form-group">
+        <label>Nom de votre entreprise ou projet</label>
+        <input type="text" id="reg-company" placeholder="Ex: GENESIS / Happiness Travel">
+      </div>
+      <div class="form-group">
+        <label>Adresse Email</label>
+        <input type="email" id="reg-email" placeholder="votre@email.com">
+      </div>
+      <div class="form-group">
+        <label>Mot de passe (6 caractères minimum)</label>
+        <input type="password" id="reg-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doRegister()">
+      </div>
+      <button class="btn btn-block" onclick="doRegister()">Créer mon compte gratuit 🚀</button>
+    </div>
+
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);text-align:center;">
+      <button class="btn btn-outline btn-block" style="font-size:12.5px;padding:9px;" onclick="installPWA()">📲 Installer l'application sur mon téléphone / PC</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     ÉCRAN 2 : DASHBOARD PRO MULTI-ONGLETS
+     ========================================================= -->
+<div id="screen-app" class="view-screen">
+
+  <!-- BARRE LATÉRALE -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      🤖 Wha<span>Bot</span> <span class="pro-pill">PRO</span>
+    </div>
+
+    <div class="nav-menu">
+      <button class="nav-item active" onclick="openTab('overview', this)">📊 Vue d'ensemble & QR</button>
+      <button class="nav-item" onclick="openTab('brain', this)">🧠 Cerveau IA & Modèles</button>
+      <button class="nav-item" onclick="openTab('playground', this)">🧪 Simulateur IA Live</button>
+      <button class="nav-item" onclick="openTab('crm', this)">👥 Mini-CRM & Chats</button>
+      <button class="nav-item" onclick="openTab('automation', this)">⚡ Automatisations & Audio</button>
+      <button class="nav-item" onclick="openTab('billing', this)">💳 Abonnements</button>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-chip-info">
+          <div class="user-chip-name" id="sidebar-username">Utilisateur</div>
+          <div class="user-chip-plan" id="sidebar-plan">Plan Essai Pro</div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-block" style="font-size:12px;padding:9px;margin-bottom:8px;" onclick="installPWA()">📲 Installer l'App</button>
+      <button class="btn btn-secondary btn-block" style="font-size:12px;padding:9px;" onclick="logout()">🚪 Déconnexion</button>
+    </div>
+  </aside>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="main-area">
+
+    <!-- ONGLET 1 : VUE D'ENSEMBLE & CONNEXION WHATSAPP -->
+    <section id="tab-overview" class="tab-pane active">
+      <div class="page-header">
+        <div>
+          <h2>📊 Tableau de bord</h2>
+          <p>Gérez la connexion WhatsApp et suivez l'activité de votre assistant IA en temps réel.</p>
+        </div>
+        <button class="btn btn-outline" onclick="openTab('playground', document.querySelectorAll('.nav-item')[2])">🧪 Tester mon IA en direct</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-top"><span>💬 Réponses IA envoyées</span><span>⚡</span></div>
+          <div class="stat-val" id="stat-messages">0</div>
+          <div class="stat-sub">Traités automatiquement</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span>👥 Contacts dans le CRM</span><span>📒</span></div>
+          <div class="stat-val" id="stat-contacts">0</div>
+          <div class="stat-sub">Mémoire permanente active</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span>📱 État WhatsApp</span><span>📡</span></div>
+          <div class="stat-val" id="stat-status-text" style="font-size:20px;">Hors ligne</div>
+          <div class="stat-sub" id="stat-phone-sub">Aucun numéro relié</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span>🎙️ Capacités IA</span><span>✨</span></div>
+          <div class="stat-val" style="font-size:20px;color:var(--green);">Texte + Vocal + Image</div>
+          <div class="stat-sub">Propulsé par Gemini 3.5</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📱 Relier votre numéro WhatsApp</h3>
+        <p class="card-desc">Cliquez sur « Générer le QR Code » puis scannez-le depuis WhatsApp (Appareils connectés → Connecter un appareil).</p>
+
+        <div id="bot-status-area" style="margin-bottom:18px;">
+          <div class="status-badge disconnected"><span class="dot"></span> Non connecté</div>
+        </div>
+
+        <div id="qr-container" style="display:none; text-align:center; padding:24px; background:var(--input-bg); border-radius:16px; border:1px solid var(--border); margin-bottom:18px;"></div>
+
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="btn" onclick="startBot()">🔗 Générer le QR Code / Connecter WhatsApp</button>
+          <button class="btn btn-danger" onclick="stopBot()">⏹ Déconnecter / Arrêter le bot</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET 2 : CERVEAU IA & MODÈLES MÉTIERS -->
+    <section id="tab-brain" class="tab-pane">
+      <div class="page-header">
+        <div>
+          <h2>🧠 Cerveau IA & Catalogue</h2>
+          <p>Personnalisez l'identité de votre assistant ou chargez un modèle métier pré-configuré en 1 clic.</p>
+        </div>
+        <button class="btn" onclick="saveConfig()">💾 Enregistrer les modifications</button>
+      </div>
+
+      <div id="cfg-msg" class="msg"></div>
+
+      <div class="card">
+        <h3>⚡ Modèles Métiers en 1 clic (Inspiration des meilleurs bots mondiaux)</h3>
+        <p class="card-desc">Cliquez sur un métier pour pré-remplir automatiquement les meilleures consignes de vente et de service client :</p>
+        <div class="template-grid">
+          <button class="template-btn" onclick="applyTemplate('travel')">
+            <span class="t-icon">✈️</span>
+            <span class="t-title">Agence de Voyage</span>
+            <span class="t-sub">Billets, Visas, Hôtels</span>
+          </button>
+          <button class="template-btn" onclick="applyTemplate('ecommerce')">
+            <span class="t-icon">🛍️</span>
+            <span class="t-title">Boutique / E-commerce</span>
+            <span class="t-sub">Catalogue, Livraison, MoMo</span>
+          </button>
+          <button class="template-btn" onclick="applyTemplate('resto')">
+            <span class="t-icon">🍽️</span>
+            <span class="t-title">Restaurant / Fast-Food</span>
+            <span class="t-sub">Menu, Commandes, Adresse</span>
+          </button>
+          <button class="template-btn" onclick="applyTemplate('immo')">
+            <span class="t-icon">🏠</span>
+            <span class="t-title">Immobilier</span>
+            <span class="t-sub">Location, Terrains, Visites</span>
+          </button>
+          <button class="template-btn" onclick="applyTemplate('clinic')">
+            <span class="t-icon">🏥</span>
+            <span class="t-title">Clinique / Santé</span>
+            <span class="t-sub">Rendez-vous, Horaires, Soins</span>
+          </button>
+          <button class="template-btn" onclick="applyTemplate('personal')">
+            <span class="t-icon">👤</span>
+            <span class="t-title">Assistant Personnel</span>
+            <span class="t-sub">Style Maya (Secrétaire privée)</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🪪 Identité & Style de l'Assistant</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Prénom de l'assistant IA</label>
+            <input type="text" id="cfg-botname" placeholder="Ex: Maya, Sofia, Alex...">
+          </div>
+          <div class="form-group">
+            <label>Nom de l'entreprise (ou votre nom)</label>
+            <input type="text" id="cfg-company" placeholder="Ex: GENESIS, Happiness Travel...">
+          </div>
+          <div class="form-group">
+            <label>Secteur d'activité</label>
+            <select id="cfg-sector">
+              <option value="agence de voyage">🌍 Agence de voyage & Visas</option>
+              <option value="boutique / e-commerce">🛍️ Boutique & E-commerce</option>
+              <option value="restaurant">🍽️ Restaurant & Alimentation</option>
+              <option value="immobilier">🏠 Agence Immobilière</option>
+              <option value="santé / clinique">🏥 Santé, Clinique & Pharmacie</option>
+              <option value="éducation / formation">📚 Formation & Coaching</option>
+              <option value="assistant personnel">👤 Assistant Personnel Privé</option>
+              <option value="service client général">📞 Service Client & Entreprise</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Ton & Personnalité</label>
+            <select id="cfg-tone">
+              <option value="professionnel, chaleureux et persuasif">Professionnel, chaleureux & commercial</option>
+              <option value="amical, dynamique et proche du client">Amical, dynamique & décontracté</option>
+              <option value="très courtois, poli et rassurant">Très courtois, poli & rassurant (Secrétaire)</option>
+              <option value="direct, concis et orienté conclusion de vente">Direct, concis & orienté vente rapide</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>📦 Catalogue Produits / Services & Tarifs (L'IA utilisera ces prix pour renseigner et vendre)</label>
+          <textarea id="cfg-catalog" rows="4" placeholder="Ex:&#10;- Billet Cotonou-Paris : à partir de 450 000 FCFA&#10;- Assistance Visa Canada / Schengen : 150 000 FCFA&#10;- Pack Hôtel + Assurance : sur devis"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>📚 Instructions clés, Horaires, Adresse & FAQ</label>
+          <textarea id="cfg-faq" rows="5" placeholder="Ex:&#10;- Horaires : Lundi au Samedi de 8h à 19h à Cotonou&#10;- Paiement accepté : MTN MoMo, Moov Money, Espèces&#10;- Délai de livraison : 24h maximum"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>🎯 Lien ou Numéro de finalisation (Paiement, Réservation ou Urgence)</label>
+          <input type="text" id="cfg-cta" placeholder="Ex: Appelez le +229 97 05 51 04 ou payez par MoMo au +229 62 83 63 80">
+        </div>
+
+        <button class="btn btn-block" onclick="saveConfig()">💾 Sauvegarder le Cerveau IA</button>
+      </div>
+    </section>
+
+    <!-- ONGLET 3 : SIMULATEUR IA EN DIRECT (PLAYGROUND) -->
+    <section id="tab-playground" class="tab-pane">
+      <div class="page-header">
+        <div>
+          <h2>🧪 Simulateur IA en direct (Playground)</h2>
+          <p>Discutez avec votre assistant comme si vous étiez un client sur WhatsApp pour vérifier ses réponses.</p>
+        </div>
+        <button class="btn btn-secondary" onclick="resetPlayground()">🧹 Réinitialiser la discussion</button>
+      </div>
+
+      <div class="playground-wrap">
+        <div class="wa-chat-box">
+          <div class="wa-header">
+            <div class="wa-header-left">
+              <div class="wa-avatar">🤖</div>
+              <div>
+                <div style="font-weight:700;font-size:14px;" id="pg-bot-title">Votre Assistant IA</div>
+                <div style="font-size:11px;color:var(--green);">En ligne • Simulation temps réel</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wa-messages" id="pg-messages">
+            <div class="wa-bubble bot">Bonjour ! 👋 Je suis votre assistant IA. Écrivez-moi un message ci-dessous pour tester comment je réponds à vos clients !</div>
+          </div>
+
+          <div class="wa-input-bar">
+            <input type="text" id="pg-input" placeholder="Écrire un message test (ex: Quels sont vos tarifs ?)..." onkeydown="if(event.key==='Enter') sendPlaygroundMsg()">
+            <button class="btn" onclick="sendPlaygroundMsg()">Envoyer ➤</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:0;">
+          <h3>💡 Questions de test rapides</h3>
+          <p class="card-desc">Cliquez sur une phrase pour l'envoyer instantanément au simulateur :</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-secondary" style="justify-content:flex-start;font-size:12px;" onclick="quickPlay('Bonjour, quels sont vos services et vos tarifs ?')">💬 « Quels sont vos tarifs ? »</button>
+            <button class="btn btn-secondary" style="justify-content:flex-start;font-size:12px;" onclick="quickPlay('Où êtes-vous situés et quels sont vos horaires ?')">📍 « Où êtes-vous situés ? »</button>
+            <button class="btn btn-secondary" style="justify-content:flex-start;font-size:12px;" onclick="quickPlay('Comment puis-je payer ou réserver maintenant ?')">💳 « Comment payer / réserver ? »</button>
+            <button class="btn btn-secondary" style="justify-content:flex-start;font-size:12px;" onclick="quickPlay('Je voudrais parler à un responsable humain.')">🤝 « Parler à un humain »</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET 4 : MINI-CRM & CONVERSATIONS WHATSAPP -->
+    <section id="tab-crm" class="tab-pane">
+      <div class="page-header">
+        <div>
+          <h2>👥 Mini-CRM & Conversations Live</h2>
+          <p>Consultez toutes les discussions de votre bot, prenez le relais manuellement ou envoyez un message direct.</p>
+        </div>
+        <button class="btn btn-secondary" onclick="loadCRM()">🔄 Actualiser les discussions</button>
+      </div>
+
+      <div class="crm-layout">
+        <!-- Liste des contacts -->
+        <div class="crm-list-card">
+          <div class="crm-list-header">
+            <strong style="font-size:14px;">Clients WhatsApp</strong>
+            <span id="crm-count" style="font-size:12px;color:var(--green);">0 contact(s)</span>
+          </div>
+          <div class="crm-contacts" id="crm-contacts-list">
+            <div style="padding:24px;text-align:center;color:var(--muted);font-size:13px;">Aucune conversation WhatsApp enregistrée pour le moment.</div>
+          </div>
+        </div>
+
+        <!-- Fenêtre de conversation CRM -->
+        <div class="wa-chat-box" style="height:560px;">
+          <div class="wa-header">
+            <div class="wa-header-left">
+              <div class="wa-avatar" style="background:#2a3942;color:var(--text);">👤</div>
+              <div>
+                <div style="font-weight:700;font-size:14px;" id="crm-active-phone">Sélectionnez un client</div>
+                <div style="font-size:11px;color:var(--muted);" id="crm-active-status">Historique permanent</div>
+              </div>
+            </div>
+            <div id="crm-actions" style="display:none;">
+              <button class="btn btn-secondary" id="crm-pause-btn" style="padding:6px 12px;font-size:12px;" onclick="toggleCurrentContactPause()">⏸️ Mettre l'IA en pause</button>
+            </div>
+          </div>
+
+          <div class="wa-messages" id="crm-messages">
+            <div style="margin:auto;text-align:center;color:var(--muted);font-size:13px;">👈 Cliquez sur un client à gauche pour lire la discussion ou lui répondre en direct.</div>
+          </div>
+
+          <div class="wa-input-bar">
+            <input type="text" id="crm-send-phone" placeholder="N° (ex: 22997055104)" style="max-width:165px;">
+            <input type="text" id="crm-send-text" placeholder="Envoyer un message WhatsApp en direct..." onkeydown="if(event.key==='Enter') sendCRMMessage()">
+            <button class="btn" onclick="sendCRMMessage()">Envoyer ➤</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET 5 : AUTOMATISATIONS, VOCAUX & FILTRAGE -->
+    <section id="tab-automation" class="tab-pane">
+      <div class="page-header">
+        <div>
+          <h2>⚡ Automatisations, Audio & Règles</h2>
+          <p>Configurez le délai de réponse, la lecture des vocaux/images, le relais humain et les listes de contacts.</p>
+        </div>
+        <button class="btn" onclick="saveConfig()">💾 Enregistrer les règles</button>
+      </div>
+
+      <div id="auto-msg" class="msg"></div>
+
+      <div class="card">
+        <h3>🎙️ Intelligence Multimodale & Relais Humain</h3>
+        <p class="card-desc">Activez les super-pouvoirs inspirés des meilleurs assistants IA :</p>
+
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-row-title">🎙️ Écouter et répondre aux Notes Vocales</div>
+            <div class="toggle-row-desc">L'IA télécharge les audios WhatsApp, comprend ce que dit le client et lui répond.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="cfg-voice" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-row-title">📸 Analyser les Images & Documents reçus</div>
+            <div class="toggle-row-desc">L'IA lit les captures Mobile Money, photos de produits, passeports ou factures.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="cfg-images" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="form-grid" style="margin-top:18px;">
+          <div class="form-group">
+            <label>⏱️ Délai avant réponse de l'IA (Mode Entreprise vs Mode Absence)</label>
+            <select id="cfg-delay">
+              <option value="0">⚡ Instantané (0 seconde — Idéal Entreprise)</option>
+              <option value="10">⏳ Après 10 secondes sans réponse de ma part</option>
+              <option value="30">⏳ Après 30 secondes sans réponse de ma part</option>
+              <option value="60">⏳ Après 1 minute d'absence (Style Maya)</option>
+              <option value="180">⏳ Après 3 minutes d'absence</option>
+              <option value="300">⏳ Après 5 minutes d'absence</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>🤝 Pause automatique quand vous répondez vous-même (Relais Humain)</label>
+            <select id="cfg-human-pause">
+              <option value="15">⏸️ Pause IA de 15 minutes quand j'interviens</option>
+              <option value="30">⏸️ Pause IA de 30 minutes quand j'interviens</option>
+              <option value="60">⏸️ Pause IA de 1 heure quand j'interviens</option>
+              <option value="0">🔄 Pas de pause automatique</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🛡️ Filtrage des Contacts & Instructions par Numéro</h3>
+        <div class="form-group">
+          <label>Qui doit recevoir les réponses de l'IA ?</label>
+          <select id="cfg-filter-mode">
+            <option value="all">🌍 Tout le monde (Sauf les numéros dans la Liste Noire)</option>
+            <option value="whitelist">🔒 Uniquement les numéros autorisés dans la Liste Blanche (Mode Privé Maya)</option>
+          </select>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>🚫 Liste Noire (Numéros à ignorer, séparés par une virgule)</label>
+            <input type="text" id="cfg-blacklist" placeholder="Ex: 22990000000, 22991111111">
+          </div>
+          <div class="form-group">
+            <label>✅ Liste Blanche (Si Mode Privé choisi, séparés par une virgule)</label>
+            <input type="text" id="cfg-whitelist" placeholder="Ex: 22952930663, 22997055104">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>📝 Consignes spéciales par numéro (1 par ligne au format NUMERO : CONSIGNE)</label>
+          <textarea id="cfg-contact-notes" rows="4" placeholder="Ex:&#10;22952930663 : C'est mon ami Olive, appelle-le par son prénom et sois chaleureux&#10;22997055104 : C'est ma femme Afdol, sois très attentionné et doux"></textarea>
+        </div>
+
+        <button class="btn btn-block" onclick="saveConfig()">💾 Enregistrer les Automatisations</button>
+      </div>
+    </section>
+
+    <!-- ONGLET 6 : ABONNEMENTS & PAIEMENT MOBILE MONEY -->
+    <section id="tab-billing" class="tab-pane">
+      <div class="page-header">
+        <div>
+          <h2>💳 Plans & Abonnements WhaBot</h2>
+          <p>Passez à la vitesse supérieure avec les paiements locaux MTN MoMo, Moov Money et Carte Bancaire.</p>
+        </div>
+      </div>
+
+      <div class="plans-grid">
+        <div class="plan-card">
+          <div>
+            <h3>Starter</h3>
+            <div class="plan-price">5 000 FCFA <small>/ mois</small></div>
+            <ul class="plan-features">
+              <li>1 Numéro WhatsApp connecté</li>
+              <li>500 réponses IA / mois</li>
+              <li>Texte + Catalogue produits</li>
+              <li>Relais humain automatique</li>
+              <li>Mini-CRM inclus</li>
+            </ul>
+          </div>
+          <button class="btn btn-outline btn-block" onclick="showPayment('Starter', '5 000')">Choisir Starter</button>
+        </div>
+
+        <div class="plan-card popular">
+          <div class="popular-tag">⭐ PLUS POPULAIRE</div>
+          <div>
+            <h3>Pro Illimité</h3>
+            <div class="plan-price">15 000 FCFA <small>/ mois</small></div>
+            <ul class="plan-features">
+              <li>1 Numéro WhatsApp connecté</li>
+              <li>Messages IA illimités 24h/24</li>
+              <li>🎙️ Lecture des Notes Vocales</li>
+              <li>📸 Analyse d'Images & Reçus</li>
+              <li>Mini-CRM & Messagerie Live</li>
+              <li>Support prioritaire WhatsApp</li>
+            </ul>
+          </div>
+          <button class="btn btn-block" onclick="showPayment('Pro Illimité', '15 000')">Souscrire au Plan Pro</button>
+        </div>
+
+        <div class="plan-card">
+          <div>
+            <h3>Business Agence</h3>
+            <div class="plan-price">35 000 FCFA <small>/ mois</small></div>
+            <ul class="plan-features">
+              <li>Jusqu'à 3 Numéros WhatsApp</li>
+              <li>Messages, Vocaux & Images illimités</li>
+              <li>Configuration sur-mesure incluse</li>
+              <li>Formation de votre équipe</li>
+              <li>Accompagnement VIP dédié</li>
+            </ul>
+          </div>
+          <button class="btn btn-outline btn-block" onclick="showPayment('Business Agence', '35 000')">Choisir Business</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const API = '/api';
+  let token = localStorage.getItem('whabot_token');
+  let currentUser = null;
+  let qrPollInterval = null;
+  let statusPollInterval = null;
+  let crmConversations = [];
+  let selectedCrmJid = null;
+
+  const TEMPLATES = {
+    travel: {
+      botName: 'Sofia',
+      sector: 'agence de voyage',
+      tone: 'professionnel, chaleureux et persuasif',
+      catalog: `- Billets d'avion toutes destinations : tarifs sur mesure selon vos dates\n- Assistance Visa (Canada, Schengen, USA, Dubaï, Chine) : étude de dossier + prise de RDV\n- Réservation d'hôtels & Assurance voyage internationale`,
+      faq: `- Nous accompagnons les voyageurs de A à Z pour les visas et billets d'avion.\n- Demandez toujours la destination souhaitée, la date prévue et le motif du voyage.\n- Paiement possible par MTN Mobile Money, Moov Money ou en agence.`
+    },
+    ecommerce: {
+      botName: 'Alex',
+      sector: 'boutique / e-commerce',
+      tone: 'amical, dynamique et proche du client',
+      catalog: `- Livraison express à Cotonou et environs : 1 000 à 2 000 FCFA\n- Expédition dans toutes les villes du Bénin et sous-région\n- Garantie satisfaction sur tous nos articles en stock`,
+      faq: `- Demandez au client quel article l'intéresse et son quartier de livraison.\n- Paiement à la livraison ou par MTN MoMo / Moov Money.\n- Si le client envoie une photo d'un produit, confirme la disponibilité et prends sa commande.`
+    },
+    resto: {
+      botName: 'Chef IA',
+      sector: 'restaurant',
+      tone: 'amical, dynamique et proche du client',
+      catalog: `- Menus du jour, Grillades, Burgers, Chawarma & Jus naturels\n- Livraison rapide en 30-45 minutes\n- Réservation de table et service traiteur disponible`,
+      faq: `- Demandez toujours : les plats souhaités, le nombre de portions et l'adresse/quartier exact de livraison.\n- Ouvert tous les jours de 11h00 à 23h30.`
+    },
+    immo: {
+      botName: 'Claire',
+      sector: 'immobilier',
+      tone: 'professionnel, chaleureux et persuasif',
+      catalog: `- Appartements meublés et non meublés à louer\n- Parcelles sécurisées avec Titre Foncier en vente\n- Gestion locative et visite guidée sur rendez-vous`,
+      faq: `- Demandez au client : son budget approximatif, la zone recherchée (Cotonou, Calavi, etc.) et s'il souhaite planifier une visite.`
+    },
+    clinic: {
+      botName: 'Dr Assist',
+      sector: 'santé / clinique',
+      tone: 'très courtois, poli et rassurant',
+      catalog: `- Consultations générales et spécialisées sur rendez-vous\n- Analyses médicales et suivi patient\n- Urgences et renseignements pharmaceutiques`,
+      faq: `- Rassurez le patient avec empathie.\n- Demandez le motif de consultation ainsi que le jour et l'heure souhaités pour son rendez-vous.`
+    },
+    personal: {
+      botName: 'Maya',
+      sector: 'assistant personnel',
+      tone: 'très courtois, poli et rassurant',
+      catalog: ``,
+      faq: `- Tu es l'assistante personnelle privée.\n- Explique poliment que ton responsable est momentanément occupé.\n- Demande à l'interlocuteur s'il souhaite laisser une commission urgente et rassure-le.`
+    }
+  };
+
+  window.onload = () => {
+    if (token) loadDashboard();
+    else showAuthScreen();
+  };
+
+  function showAuthScreen() {
+    document.getElementById('screen-auth').classList.add('active');
+    document.getElementById('screen-app').classList.remove('active');
+  }
+
+  function showAppScreen() {
+    document.getElementById('screen-auth').classList.remove('active');
+    document.getElementById('screen-app').classList.add('active');
+  }
+
+  function switchAuthTab(tab) {
+    document.getElementById('tab-btn-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-btn-register').classList.toggle('active', tab === 'register');
+    document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('auth-alert').className = 'msg';
+  }
+
+  function openTab(tabId, btnEl) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    if (btnEl) {
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      btnEl.classList.add('active');
+    }
+    if (tabId === 'crm') loadCRM();
+  }
+
+  // ── AUTHENTIFICATION ──
+  async function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) return showMsg('auth-alert', 'Veuillez remplir votre email et mot de passe.', 'error');
+
+    try {
+      const r = await fetch(`${API}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await r.json();
+      if (!r.ok) return showMsg('auth-alert', data.error || 'Identifiants incorrects', 'error');
+      token = data.token;
+      localStorage.setItem('whabot_token', token);
+      await loadDashboard();
+    } catch (e) {
+      showMsg('auth-alert', 'Erreur de connexion au serveur.', 'error');
+    }
+  }
+
+  async function doRegister() {
+    const name = document.getElementById('reg-name').value.trim();
+    const company = document.getElementById('reg-company').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    if (!name || !email || !password) return showMsg('auth-alert', 'Veuillez remplir tous les champs obligatoires.', 'error');
+
+    try {
+      const r = await fetch(`${API}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, company, email, password })
+      });
+      const data = await r.json();
+      if (!r.ok) return showMsg('auth-alert', data.error || 'Erreur lors de la création', 'error');
+      token = data.token;
+      localStorage.setItem('whabot_token', token);
+      await loadDashboard();
+    } catch (e) {
+      showMsg('auth-alert', 'Erreur de connexion au serveur.', 'error');
+    }
+  }
+
+  async function loadDashboard() {
+    try {
+      const r = await fetch(`${API}/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (!r.ok) return logout();
+      const user = await r.json();
+      currentUser = user;
+      fillUserForm(user);
+      showAppScreen();
+      pollStatus();
+    } catch (e) {
+      logout();
+    }
+  }
+
+  function fillUserForm(user) {
+    document.getElementById('sidebar-username').textContent = `👤 ${user.name || user.email}`;
+    document.getElementById('sidebar-plan').textContent = `⭐ Plan ${user.plan || 'Essai Pro'}`;
+    const c = user.botConfig || {};
+    document.getElementById('cfg-botname').value = c.botName || 'Maya';
+    document.getElementById('cfg-company').value = c.companyName || user.company || '';
+    document.getElementById('cfg-sector').value = c.sector || 'agence de voyage';
+    document.getElementById('cfg-tone').value = c.tone || 'professionnel, chaleureux et persuasif';
+    document.getElementById('cfg-catalog').value = c.catalog || '';
+    document.getElementById('cfg-faq').value = c.faq || '';
+    document.getElementById('cfg-cta').value = c.ctaLink || '';
+    document.getElementById('cfg-voice').checked = c.enableVoice !== false;
+    document.getElementById('cfg-images').checked = c.enableImages !== false;
+    document.getElementById('cfg-delay').value = String(c.replyDelaySeconds || 0);
+    document.getElementById('cfg-human-pause').value = String(c.humanPauseMinutes ?? 15);
+    document.getElementById('cfg-filter-mode').value = c.filterMode || 'all';
+    document.getElementById('cfg-blacklist').value = (c.blacklist || []).join(', ');
+    document.getElementById('cfg-whitelist').value = (c.whitelist || []).join(', ');
+
+    const notesLines = Object.entries(c.contactNotes || {}).map(([num, note]) => `${num} : ${note}`);
+    document.getElementById('cfg-contact-notes').value = notesLines.join('\n');
+
+    document.getElementById('pg-bot-title').textContent = `${c.botName || 'Assistant IA'} (${c.companyName || 'Entreprise'})`;
+  }
+
+  function logout() {
+    localStorage.removeItem('whabot_token');
+    token = null;
+    currentUser = null;
+    if (qrPollInterval) clearInterval(qrPollInterval);
+    if (statusPollInterval) clearInterval(statusPollInterval);
+    showAuthScreen();
+  }
+
+  // ── TEMPLATES MÉTIERS ──
+  function applyTemplate(key) {
+    const t = TEMPLATES[key];
+    if (!t) return;
+    document.getElementById('cfg-botname').value = t.botName;
+    document.getElementById('cfg-sector').value = t.sector;
+    document.getElementById('cfg-tone').value = t.tone;
+    document.getElementById('cfg-catalog').value = t.catalog;
+    document.getElementById('cfg-faq').value = t.faq;
+    showMsg('cfg-msg', `✨ Modèle "${t.sector.toUpperCase()}" appliqué ! Cliquez sur Enregistrer pour activer.`, 'success');
+  }
+
+  // ── SAUVEGARDE CONFIGURATION ──
+  function gatherConfigFromUI() {
+    const notesRaw = document.getElementById('cfg-contact-notes').value.split('\n');
+    const contactNotes = {};
+    for (const line of notesRaw) {
+      const idx = line.indexOf(':');
+      if (idx > 0) {
+        const num = line.slice(0, idx).replace(/[^0-9]/g, '');
+        const note = line.slice(idx + 1).trim();
+        if (num && note) contactNotes[num] = note;
+      }
+    }
+    return {
+      botName: document.getElementById('cfg-botname').value.trim(),
+      companyName: document.getElementById('cfg-company').value.trim(),
+      sector: document.getElementById('cfg-sector').value,
+      tone: document.getElementById('cfg-tone').value,
+      catalog: document.getElementById('cfg-catalog').value,
+      faq: document.getElementById('cfg-faq').value,
+      ctaLink: document.getElementById('cfg-cta').value.trim(),
+      enableVoice: document.getElementById('cfg-voice').checked,
+      enableImages: document.getElementById('cfg-images').checked,
+      replyDelaySeconds: Number(document.getElementById('cfg-delay').value),
+      humanPauseMinutes: Number(document.getElementById('cfg-human-pause').value),
+      filterMode: document.getElementById('cfg-filter-mode').value,
+      blacklist: document.getElementById('cfg-blacklist').value.split(',').map(s => s.replace(/[^0-9]/g, '')).filter(Boolean),
+      whitelist: document.getElementById('cfg-whitelist').value.split(',').map(s => s.replace(/[^0-9]/g, '')).filter(Boolean),
+      contactNotes
+    };
+  }
+
+  async function saveConfig() {
+    const cfg = gatherConfigFromUI();
+    try {
+      const r = await fetch(`${API}/bot/config`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(cfg)
+      });
+      const data = await r.json();
+      document.getElementById('pg-bot-title').textContent = `${cfg.botName || 'Assistant IA'} (${cfg.companyName || 'Entreprise'})`;
+      showMsg('cfg-msg', '✅ ' + (data.message || 'Configuration enregistrée !'), 'success');
+      showMsg('auto-msg', '✅ ' + (data.message || 'Automatisations enregistrées !'), 'success');
+    } catch (e) {
+      showMsg('cfg-msg', '❌ Erreur de connexion', 'error');
+    }
+  }
+
+  // ── CONNEXION WHATSAPP & QR ──
+  async function startBot() {
+    try {
+      const r = await fetch(`${API}/bot/start`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await r.json();
+      if (!r.ok) return alert(data.error);
+      document.getElementById('bot-status-area').innerHTML = '<div class="status-badge waiting"><span class="dot"></span> Génération du QR Code en cours...</div>';
+      document.getElementById('qr-container').style.display = 'block';
+      document.getElementById('qr-container').innerHTML = '<p style="color:var(--muted);">⏳ Préparation du QR Code sécurisé WhatsApp...</p>';
+      startQRPoll();
+      startStatusPoll();
+    } catch (e) {
+      alert('Erreur démarrage du bot');
+    }
+  }
+
+  async function stopBot() {
+    await fetch(`${API}/bot/stop`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+    document.getElementById('bot-status-area').innerHTML = '<div class="status-badge disconnected"><span class="dot"></span> Non connecté</div>';
+    document.getElementById('qr-container').style.display = 'none';
+    document.getElementById('stat-status-text').textContent = 'Hors ligne';
+    if (qrPollInterval) clearInterval(qrPollInterval);
+  }
+
+  function startQRPoll() {
+    if (qrPollInterval) clearInterval(qrPollInterval);
+    qrPollInterval = setInterval(async () => {
+      try {
+        const r = await fetch(`${API}/bot/qr`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (r.ok) {
+          const data = await r.json();
+          document.getElementById('qr-container').innerHTML = `
+            <img src="${data.qr}" alt="QR Code WhatsApp" style="width:230px;height:230px;border:4px solid var(--green);border-radius:16px;">
+            <p style="margin-top:12px;color:var(--text);font-weight:600;">📱 Ouvrez WhatsApp → Appareils connectés → Scanner ce code</p>`;
+        }
+      } catch (e) {}
+    }, 2500);
+  }
+
+  function startStatusPoll() {
+    if (statusPollInterval) clearInterval(statusPollInterval);
+    statusPollInterval = setInterval(fetchStatusOnce, 4000);
+  }
+
+  async function fetchStatusOnce() {
+    try {
+      const r = await fetch(`${API}/bot/status`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (!r.ok) return;
+      const data = await r.json();
+      document.getElementById('stat-messages').textContent = data.messagesHandled || 0;
+      document.getElementById('stat-contacts').textContent = data.contactCount || 0;
+
+      if (data.isConnected) {
+        document.getElementById('bot-status-area').innerHTML = `<div class="status-badge connected"><span class="dot"></span> Connecté et actif sur +${data.phone}</div>`;
+        document.getElementById('qr-container').style.display = 'none';
+        document.getElementById('stat-status-text').textContent = '🟢 En ligne';
+        document.getElementById('stat-phone-sub').textContent = `+${data.phone}`;
+        if (qrPollInterval) clearInterval(qrPollInterval);
+      } else if (data.hasQR) {
+        document.getElementById('stat-status-text').textContent = '🟡 Attente QR';
+      }
+    } catch (e) {}
+  }
+
+  function pollStatus() {
+    fetchStatusOnce();
+    startStatusPoll();
+  }
+
+  // ── SIMULATEUR PLAYGROUND ──
+  function quickPlay(text) {
+    document.getElementById('pg-input').value = text;
+    sendPlaygroundMsg();
+  }
+
+  async function sendPlaygroundMsg() {
+    const input = document.getElementById('pg-input');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+
+    const box = document.getElementById('pg-messages');
+    box.innerHTML += `<div class="wa-bubble user">${escapeHtml(text)}</div>`;
+    const loadingId = 'loading-' + Date.now();
+    box.innerHTML += `<div class="wa-bubble bot" id="${loadingId}" style="color:var(--muted);">⏳ L'assistant rédige une réponse...</div>`;
+    box.scrollTop = box.scrollHeight;
+
+    try {
+      const customConfig = gatherConfigFromUI();
+      const r = await fetch(`${API}/bot/playground`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, customConfig })
+      });
+      const data = await r.json();
+      const el = document.getElementById(loadingId);
+      if (el) {
+        el.style.color = 'var(--text)';
+        el.textContent = data.reply || data.error || 'Erreur';
+      }
+      box.scrollTop = box.scrollHeight;
+    } catch (e) {
+      const el = document.getElementById(loadingId);
+      if (el) el.textContent = '❌ Erreur réseau.';
+    }
+  }
+
+  async function resetPlayground() {
+    await fetch(`${API}/bot/playground`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reset: true })
+    });
+    document.getElementById('pg-messages').innerHTML = `<div class="wa-bubble bot">🧹 Mémoire réinitialisée ! Écrivez un message pour tester votre assistant.</div>`;
+  }
+
+  // ── MINI-CRM & MESSAGERIE LIVE ──
+  async function loadCRM() {
+    try {
+      const r = await fetch(`${API}/bot/conversations`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await r.json();
+      crmConversations = data.conversations || [];
+      document.getElementById('crm-count').textContent = `${crmConversations.length} contact(s)`;
+
+      const listEl = document.getElementById('crm-contacts-list');
+      if (crmConversations.length === 0) {
+        listEl.innerHTML = `<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px;">Aucune conversation pour le moment.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = crmConversations.map(c => `
+        <div class="crm-contact-item ${selectedCrmJid === c.jid ? 'active' : ''}" onclick="selectCRMContact('${c.jid}')">
+          <div class="crm-contact-top">
+            <span class="crm-contact-phone">+${c.phone} ${c.name ? `(${escapeHtml(c.name)})` : ''}</span>
+            <span style="font-size:11px;color:${c.paused ? '#fbbf24' : 'var(--green)'};">${c.paused ? '⏸️ Pause' : '🤖 IA'}</span>
+          </div>
+          <div class="crm-contact-preview">${escapeHtml(c.lastMessage || '')}</div>
+        </div>
+      `).join('');
+
+      if (selectedCrmJid) selectCRMContact(selectedCrmJid);
+    } catch (e) {}
+  }
+
+  function selectCRMContact(jid) {
+    selectedCrmJid = jid;
+    const c = crmConversations.find(item => item.jid === jid);
+    if (!c) return;
+
+    document.getElementById('crm-active-phone').textContent = `+${c.phone} ${c.name ? `(${c.name})` : ''}`;
+    document.getElementById('crm-active-status').textContent = c.paused ? '⏸️ IA en pause (Relais humain actif)' : '🤖 IA active sur ce contact';
+    document.getElementById('crm-send-phone').value = c.phone;
+    document.getElementById('crm-actions').style.display = 'block';
+    document.getElementById('crm-pause-btn').textContent = c.paused ? '▶️ Réactiver l\'IA' : '⏸️ Mettre l\'IA en pause';
+
+    const msgBox = document.getElementById('crm-messages');
+    msgBox.innerHTML = (c.messages || []).map(m => `
+      <div class="wa-bubble ${m.role === 'user' ? 'bot' : 'user'}">
+        <div style="font-size:10px;opacity:0.7;margin-bottom:3px;">${m.role === 'user' ? '👤 Client' : '🤖 Assistant / Vous'}</div>
+        ${escapeHtml(m.text)}
+      </div>
+    `).join('');
+    msgBox.scrollTop = msgBox.scrollHeight;
+  }
+
+  async function toggleCurrentContactPause() {
+    if (!selectedCrmJid) return;
+    const c = crmConversations.find(item => item.jid === selectedCrmJid);
+    if (!c) return;
+    await fetch(`${API}/bot/contact-pause`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jid: selectedCrmJid, paused: !c.paused })
+    });
+    await loadCRM();
+  }
+
+  async function sendCRMMessage() {
+    const to = document.getElementById('crm-send-phone').value.trim();
+    const text = document.getElementById('crm-send-text').value.trim();
+    if (!to || !text) return alert('Numéro et message requis');
+
+    try {
+      const r = await fetch(`${API}/bot/send`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to, text })
+      });
+      const data = await r.json();
+      if (!r.ok) return alert(data.error || 'Erreur envoi');
+      document.getElementById('crm-send-text').value = '';
+      selectedCrmJid = data.jid;
+      await loadCRM();
+    } catch (e) {
+      alert('Erreur lors de l\'envoi du message');
+    }
+  }
+
+  function showPayment(plan, price) {
+    alert(`💳 Abonnement WhaBot ${plan} — ${price} FCFA / mois\n\nMoyens de paiement acceptés :\n• MTN Mobile Money\n• Moov Money\n• Carte Bancaire (Visa / Mastercard)\n\nContactez le support WhaBot sur WhatsApp au +229 62 83 63 80 pour l'activation immédiate.`);
+  }
+
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.className = 'msg ' + type;
+    setTimeout(() => { if (el.className.includes(type)) el.className = 'msg'; }, 5000);
+  }
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
+  }
+
+  // ── PWA (PROGRESSIVE WEB APP INSTALLABLE) ──
+  let deferredInstallPrompt = null;
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+  });
+
+  async function installPWA() {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+    } else {
+      alert("📲 Pour installer l'application WhaBot Pro :\n\n• Sur PC (Chrome / Edge) : Cliquez sur l'icône d'installation (écran avec flèche) à droite dans la barre d'adresse en haut.\n• Sur Android (Chrome) : Menu (⋮) en haut à droite → « Installer l'application » ou « Ajouter à l'écran d'accueil ».\n• Sur iPhone (Safari) : Bouton Partager en bas → « Sur l'écran d'accueil ».");
+    }
+  }
+</script>
+</body>
+</html>
