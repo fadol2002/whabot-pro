@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: whabot-pro
+    runtime: docker
+    plan: free
+    envVars:
+      - key: PORT
+        value: 4000
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: JWT_SECRET
+        value: whabot_super_secret_jwt_2024_fadol
