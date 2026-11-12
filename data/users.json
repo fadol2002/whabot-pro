@@ -1,0 +1,61 @@
+{
+  "users": [
+    {
+      "id": "f38644e0-0881-4dd2-849c-5e3397960653",
+      "email": "fadol@whabot.com",
+      "password": "$2b$10$zrUVdyR23mypemSSKcGiXuwc7SKHvqgNz57HcYsky9CKJoCj8jdFS",
+      "name": "Fadol",
+      "company": "Happiness Travel",
+      "plan": "free",
+      "isActive": true,
+      "subscriptionExpiresAt": null,
+      "botConfig": {
+        "botName": "Assistant IA",
+        "companyName": "Happiness Travel",
+        "sector": "",
+        "faq": "",
+        "tone": "professionnel et aimable",
+        "isActive": true
+      },
+      "createdAt": "2026-11-12T09:09:25.762Z"
+    },
+    {
+      "id": "f10f0607-0309-49fa-92c6-8d6629c92642",
+      "email": "kossokofadol602@gmail.com",
+      "password": "$2b$10$eyLgjj9F7YaDxXtOekCUv.9G0iX/JcAp3b40lXkcweVFy7jjdFDTO",
+      "name": "Adjadi",
+      "company": "GENESIS",
+      "plan": "free",
+      "isActive": true,
+      "subscriptionExpiresAt": null,
+      "botConfig": {
+        "botName": "Assistant IA",
+        "companyName": "GENESIS",
+        "sector": "",
+        "faq": "",
+        "tone": "professionnel et aimable",
+        "isActive": true
+      },
+      "createdAt": "2026-11-12T09:16:31.465Z"
+    },
+    {
+      "id": "dfd832ed-5033-4d1e-bc46-ee4680a2f199",
+      "email": "laleyewifack@gmail.com",
+      "password": "$2b$10$g.gfQQfpm7WVOn/WrvAy7uKEjanpy8v8nckjArj/71zmgDA0gLpnW",
+      "name": "Adjadi",
+      "company": "GENESIS",
+      "plan": "free",
+      "isActive": true,
+      "subscriptionExpiresAt": null,
+      "botConfig": {
+        "botName": "Assistant IA",
+        "companyName": "GENESIS",
+        "sector": "",
+        "faq": "",
+        "tone": "professionnel et aimable",
+        "isActive": true
+      },
+      "createdAt": "2026-11-12T09:17:03.914Z"
+    }
+  ]
+}
