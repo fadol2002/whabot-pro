@@ -124,9 +124,96 @@ function loadDB() {
 
 function saveDB(db) {
   fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+  scheduleCloudSync(db);
+}
+
+let cloudSyncTimer = null;
+function getSupabaseConfig() {
+  const url = String(process.env.SUPABASE_URL || '').trim().replace(/\/+$/, '');
+  const key = String(process.env.SUPABASE_KEY || '').trim();
+  return (url && key) ? { url, key } : null;
+}
+
+function scheduleCloudSync(dbSnapshot) {
+  const cfg = getSupabaseConfig();
+  if (!cfg) return;
+  if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`${cfg.url}/rest/v1/whabot_store`, {
+        method: 'POST',
+        headers: {
+          'apikey': cfg.key,
+          'Authorization': `Bearer ${cfg.key}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({ id: 'main', data: dbSnapshot })
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        console.error('[DB Cloud] ⚠️ Erreur sync Supabase:', err);
+      }
+    } catch (e) {
+      console.error('[DB Cloud] ⚠️ Erreur réseau Supabase:', e.message);
+    }
+  }, 800);
+}
+
+async function initDB() {
+  const local = loadDB();
+  const cfg = getSupabaseConfig();
+  if (!cfg) {
+    console.log('[DB] 📁 Mode stockage local JSON (ajoutez SUPABASE_URL & SUPABASE_KEY pour persistance Cloud).');
+    return local;
+  }
+  try {
+    const res = await fetch(`${cfg.url}/rest/v1/whabot_store?id=eq.main&select=data`, {
+      headers: {
+        'apikey': cfg.key,
+        'Authorization': `Bearer ${cfg.key}`
+      }
+    });
+    if (!res.ok) {
+      console.error('[DB Cloud] ⚠️ Impossible de lire Supabase:', await res.text());
+      return local;
+    }
+    const rows = await res.json();
+    if (Array.isArray(rows) && rows.length > 0 && rows[0]?.data?.users) {
+      const cloudData = rows[0].data;
+      if (!Array.isArray(cloudData.plans) || cloudData.plans.length === 0) {
+        cloudData.plans = local.plans || DEFAULT_PLANS;
+      }
+      fs.writeFileSync(DB_PATH, JSON.stringify(cloudData, null, 2));
+      console.log(`[DB Cloud] ☁️ Base restaurée depuis Supabase (${cloudData.users.length} compte(s)) !`);
+      return cloudData;
+    } else {
+      console.log('[DB Cloud] 🚀 Initialisation de Supabase avec les comptes locaux...');
+      scheduleCloudSync(local);
+      return local;
+    }
+  } catch (e) {
+    console.error('[DB Cloud] ❌ Erreur initDB:', e.message);
+    return local;
+  }
 }
 
 module.exports = {
+  initDB,
+  exportBackup() {
+    return loadDB();
+  },
+  importBackup(payload) {
+    if (!payload || !Array.isArray(payload.users)) {
+      throw new Error('Fichier de sauvegarde invalide.');
+    }
+    const clean = {
+      users: payload.users,
+      plans: Array.isArray(payload.plans) && payload.plans.length > 0 ? payload.plans : DEFAULT_PLANS
+    };
+    saveDB(clean);
+    return clean;
+  },
   // Trouver un user par email
   findUserByEmail(email) {
     const db = loadDB();
