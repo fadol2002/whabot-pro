@@ -600,6 +600,19 @@ app.post('/api/admin/delete-user', authMiddleware, adminOnly, (req, res) => {
   res.json({ message: 'Compte client supprimé.' });
 });
 
+app.get('/api/admin/export-db', authMiddleware, adminOnly, (req, res) => {
+  res.json(db.exportBackup());
+});
+
+app.post('/api/admin/import-db', authMiddleware, adminOnly, (req, res) => {
+  try {
+    const imported = db.importBackup(req.body);
+    res.json({ message: `✅ ${imported.users.length} compte(s) et ${imported.plans.length} forfait(s) restaurés !` });
+  } catch (e) {
+    res.status(400).json({ error: e.message || 'Fichier invalide' });
+  }
+});
+
 // ─── ROUTE SANTÉ & AUTO-RÉVEIL 24H/24 (CLOUD KEEP-ALIVE) ──
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime(), time: new Date().toISOString() });
@@ -611,21 +624,24 @@ app.get('/', (req, res) => {
 });
 
 // ─── DÉMARRAGE ────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n======================================================`);
-  console.log(`🤖 WhaBot SaaS Pro — Serveur démarré !`);
-  console.log(`🌐 URL : http://localhost:${PORT}`);
-  console.log(`📡 API : http://localhost:${PORT}/api`);
-  console.log(`======================================================\n`);
+(async () => {
+  await db.initDB();
+  app.listen(PORT, () => {
+    console.log(`\n======================================================`);
+    console.log(`🤖 WhaBot SaaS Pro — Serveur démarré !`);
+    console.log(`🌐 URL : http://localhost:${PORT}`);
+    console.log(`📡 API : http://localhost:${PORT}/api`);
+    console.log(`======================================================\n`);
 
-  // Restaurer les sessions WhatsApp déjà connectées
-  restoreAllBots(db.getAllUsers());
+    // Restaurer les sessions WhatsApp déjà connectées
+    restoreAllBots(db.getAllUsers());
 
-  // Auto-ping toutes les 10 minutes sur Render / Koyeb pour ne jamais dormir
-  const externalUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_URL;
-  if (externalUrl) {
-    setInterval(() => {
-      fetch(`${externalUrl}/health`).catch(() => {});
-    }, 10 * 60 * 1000);
-  }
-});
+    // Auto-ping toutes les 10 minutes sur Render / Koyeb pour ne jamais dormir
+    const externalUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_URL;
+    if (externalUrl) {
+      setInterval(() => {
+        fetch(`${externalUrl}/health`).catch(() => {});
+      }, 10 * 60 * 1000);
+    }
+  });
+})();
