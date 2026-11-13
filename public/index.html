@@ -1181,7 +1181,11 @@
           <h2>👑 Panneau Administrateur — Clients & Forfaits</h2>
           <p>Gérez vos clients inscrits, personnalisez vos forfaits (prix, quotas, fonctionnalités incluses) ou créez de nouvelles offres.</p>
         </div>
-        <button class="btn btn-outline" onclick="loadAdminUsers()">🔄 Actualiser tout</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-outline" onclick="exportAdminDB()">📥 Sauvegarder Base</button>
+          <label class="btn btn-secondary" style="cursor:pointer;margin:0;">📤 Restaurer Base<input type="file" accept=".json" style="display:none;" onchange="importAdminDB(this)"></label>
+          <button class="btn btn-outline" onclick="loadAdminUsers()">🔄 Actualiser tout</button>
+        </div>
       </div>
 
       <div id="admin-alert" class="msg"></div>
@@ -2563,6 +2567,44 @@
       await fetchStatusOnce();
     } catch (e) {
       showMsg('admin-alert', '❌ Erreur réseau', 'error');
+    }
+  }
+
+  async function exportAdminDB() {
+    try {
+      const r = await fetch(`${API}/admin/export-db`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (!r.ok) return showMsg('admin-alert', 'Erreur export', 'error');
+      const data = await r.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `whabot-backup-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showMsg('admin-alert', '📥 Sauvegarde téléchargée avec succès !', 'success');
+    } catch (e) {}
+  }
+
+  async function importAdminDB(input) {
+    const file = input.files[0];
+    if (!file) return;
+    try {
+      const txt = await file.text();
+      const payload = JSON.parse(txt);
+      const r = await fetch(`${API}/admin/import-db`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await r.json();
+      if (!r.ok) return showMsg('admin-alert', data.error || 'Erreur import', 'error');
+      showMsg('admin-alert', data.message, 'success');
+      await loadAdminUsers();
+    } catch (e) {
+      showMsg('admin-alert', '❌ Fichier JSON invalide', 'error');
+    } finally {
+      input.value = '';
     }
   }
 
