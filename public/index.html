@@ -437,6 +437,20 @@
       .nav-menu { flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
       .nav-item { white-space: nowrap; }
       .form-grid, .playground-wrap, .crm-layout { grid-template-columns: 1fr; }
+      .crm-layout { height: auto; }
+      .crm-list-card { max-height: 260px; }
+    }
+    @media (max-width: 500px) {
+      .auth-box { padding: 22px 16px; border-radius: 16px; }
+      .main-area { padding: 14px; }
+      .card { padding: 16px; border-radius: 14px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-card { padding: 14px; }
+      .stat-card .stat-val { font-size: 22px; }
+      .country-code-select { width: 132px !important; font-size: 12.5px; padding: 10px 8px; }
+      .wa-chat-box { height: 430px !important; }
+      .wa-input-bar { flex-wrap: wrap; }
+      #crm-send-phone { max-width: 100% !important; width: 100%; }
     }
   </style>
 </head>
