@@ -810,9 +810,11 @@ async function sendPasswordResetWhatsApp(targetPhone, resetCode, userName = '') 
 
   const msgText = `🔐 *WhaBot Pro — Récupération de mot de passe*\n\nBonjour ${userName || ''},\nVoici votre code de sécurité à 6 chiffres pour réinitialiser votre mot de passe :\n\n👉 *${resetCode}*\n\n_(Ce code est valable pendant 15 minutes)_`;
 
-  // 1. Chercher un bot connecté sur WhaBot Pro
+  // 1. Chercher UNIQUEMENT un bot Admin / Officiel WhaBot Pro (JAMAIS le numéro d'un client !)
   let senderBot = null;
-  for (const [, b] of activeBots.entries()) {
+  const adminUsers = db.getUsers().filter(u => u.isAdmin);
+  for (const admin of adminUsers) {
+    const b = activeBots.get(admin.id);
     if (b && b.isConnected && b.sock) {
       senderBot = b;
       break;
