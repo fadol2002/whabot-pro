@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: whabot-pro
+    name: whabot
     runtime: docker
     plan: free
     envVars:
