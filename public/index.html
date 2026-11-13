@@ -462,21 +462,41 @@
 
     <!-- Formulaire Login -->
     <div id="form-login">
-      <div class="form-group">
-        <label>Adresse Email</label>
-        <input type="email" id="login-email" placeholder="exemple@entreprise.com">
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        <button type="button" class="chip-btn" id="login-mode-email" style="flex:1;justify-content:center;border-color:var(--green);color:var(--green);" onclick="setLoginMode('email')">📧 Par Email</button>
+        <button type="button" class="chip-btn" id="login-mode-phone" style="flex:1;justify-content:center;" onclick="setLoginMode('phone')">📱 Par Numéro WhatsApp</button>
       </div>
+
+      <div class="form-group" id="login-email-group">
+        <label>📧 Adresse Email</label>
+        <input type="email" id="login-email" placeholder="Ex: votre@email.com">
+      </div>
+
+      <div class="form-group" id="login-phone-group" style="display:none;">
+        <label>📱 Numéro de téléphone WhatsApp (Chiffres uniquement)</label>
+        <div style="display:flex;gap:8px;">
+          <select id="login-country-code" class="country-code-select" style="width:165px;flex-shrink:0;"></select>
+          <input type="tel" id="login-phone" inputmode="numeric" placeholder="Ex: 97055104" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="flex:1;">
+        </div>
+      </div>
+
       <div class="form-group">
         <label>Mot de passe</label>
-        <input type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()">
+        <div style="position:relative;display:flex;align-items:center;">
+          <input type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" style="padding-right:44px;">
+          <button type="button" onclick="togglePasswordVisibility('login-password', this)" title="Afficher / Masquer le mot de passe" style="position:absolute;right:8px;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px 6px;line-height:1;">👁️</button>
+        </div>
       </div>
       <button class="btn btn-block" onclick="doLogin()">Se connecter à mon espace →</button>
+      <div style="text-align:center;margin-top:12px;">
+        <a href="javascript:void(0)" onclick="switchAuthTab('forgot')" style="color:var(--green);font-size:13px;text-decoration:none;font-weight:600;">🔑 Mot de passe oublié ? Récupérer mon compte</a>
+      </div>
     </div>
 
     <!-- Formulaire Inscription -->
     <div id="form-register" style="display:none;">
       <div class="form-group">
-        <label>Votre prénom / nom</label>
+        <label>Votre prénom / nom <span style="color:var(--green);">*</span></label>
         <input type="text" id="reg-name" placeholder="Ex: Fadol">
       </div>
       <div class="form-group">
@@ -484,14 +504,80 @@
         <input type="text" id="reg-company" placeholder="Ex: GENESIS / Happiness Travel">
       </div>
       <div class="form-group">
-        <label>Adresse Email</label>
-        <input type="email" id="reg-email" placeholder="votre@email.com">
+        <label style="color:var(--green);">📱 Numéro WhatsApp (OBLIGATOIRE — Chiffres uniquement) *</label>
+        <div style="display:flex;gap:8px;">
+          <select id="reg-country-code" class="country-code-select" style="width:165px;flex-shrink:0;"></select>
+          <input type="tel" id="reg-phone" inputmode="numeric" placeholder="Ex: 97055104" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="flex:1;">
+        </div>
       </div>
       <div class="form-group">
-        <label>Mot de passe (6 caractères minimum)</label>
-        <input type="password" id="reg-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doRegister()">
+        <label>📧 Adresse Email (Optionnel — vous pouvez mettre Numéro + Email, ou Numéro seul)</label>
+        <input type="email" id="reg-email" placeholder="votre@email.com (facultatif)">
       </div>
-      <button class="btn btn-block" onclick="doRegister()">Créer mon compte gratuit 🚀</button>
+      <div class="form-group">
+        <label>Mot de passe (6 caractères minimum) <span style="color:var(--green);">*</span></label>
+        <div style="position:relative;display:flex;align-items:center;">
+          <input type="password" id="reg-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doRegister()" style="padding-right:44px;">
+          <button type="button" onclick="togglePasswordVisibility('reg-password', this)" title="Afficher / Masquer le mot de passe" style="position:absolute;right:8px;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px 6px;line-height:1;">👁️</button>
+        </div>
+      </div>
+      <div id="register-feedback" class="msg" style="margin-bottom:12px;"></div>
+      <button class="btn btn-block" id="btn-register-submit" onclick="doRegister()">Créer mon compte gratuit 🚀</button>
+    </div>
+
+    <!-- Formulaire Mot de passe oublié -->
+    <div id="form-forgot" style="display:none;">
+      <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:14px;font-size:12.5px;color:var(--muted);line-height:1.5;">
+        📲 Choisissez votre mode de recherche (Numéro WhatsApp ou Email) pour recevoir votre code à 6 chiffres directement sur WhatsApp.
+      </div>
+
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        <button type="button" class="chip-btn" id="forgot-mode-phone" style="flex:1;justify-content:center;border-color:var(--green);color:var(--green);" onclick="setForgotMode('phone')">📱 Par Numéro</button>
+        <button type="button" class="chip-btn" id="forgot-mode-email" style="flex:1;justify-content:center;" onclick="setForgotMode('email')">📧 Par Email</button>
+      </div>
+
+      <div class="form-group" id="forgot-phone-group">
+        <label>📱 Votre Numéro WhatsApp (Chiffres uniquement)</label>
+        <div style="display:flex;gap:8px;">
+          <select id="forgot-country-code" class="country-code-select" style="width:165px;flex-shrink:0;"></select>
+          <input type="tel" id="forgot-phone" inputmode="numeric" placeholder="Ex: 97055104" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="flex:1;">
+        </div>
+      </div>
+
+      <div id="forgot-email-group" style="display:none;">
+        <div class="form-group">
+          <label>📧 Votre Adresse Email d'inscription</label>
+          <input type="email" id="forgot-id" placeholder="Ex: votre@email.com">
+        </div>
+        <div class="form-group" id="forgot-wa-box" style="background:var(--input-bg);border:1px dashed var(--green);border-radius:12px;padding:10px;">
+          <label style="color:var(--green);">📱 À quel numéro WhatsApp envoyer votre code à 6 chiffres ? (Indispensable si vous vous êtes inscrit uniquement par email)</label>
+          <div style="display:flex;gap:8px;">
+            <select id="forgot-wa-country-code" class="country-code-select" style="width:165px;flex-shrink:0;"></select>
+            <input type="tel" id="forgot-wa" inputmode="numeric" placeholder="Ex: 97055104" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="flex:1;">
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-outline btn-block" style="margin-bottom:16px;" onclick="requestPasswordResetCode()">📲 Envoyer le code à 6 chiffres sur WhatsApp</button>
+
+      <div id="forgot-step2" style="border-top:1px solid var(--border);padding-top:14px;">
+        <div class="form-group">
+          <label>🔢 Code de sécurité à 6 chiffres reçu</label>
+          <input type="text" id="forgot-code" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Ex: 123456" maxlength="6" style="letter-spacing:3px;font-weight:800;text-align:center;">
+        </div>
+        <div class="form-group">
+          <label>🔒 Nouveau mot de passe (6 caractères minimum)</label>
+          <div style="position:relative;display:flex;align-items:center;">
+            <input type="password" id="forgot-new-pass" placeholder="••••••••" style="padding-right:44px;">
+            <button type="button" onclick="togglePasswordVisibility('forgot-new-pass', this)" title="Afficher / Masquer le mot de passe" style="position:absolute;right:8px;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px 6px;line-height:1;">👁️</button>
+          </div>
+        </div>
+        <button class="btn btn-block" onclick="confirmPasswordReset()">✅ Enregistrer mon nouveau mot de passe</button>
+      </div>
+
+      <div style="text-align:center;margin-top:12px;">
+        <a href="javascript:void(0)" onclick="switchAuthTab('login')" style="color:var(--muted);font-size:12.5px;text-decoration:none;">← Retour à la connexion</a>
+      </div>
     </div>
 
     <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);text-align:center;">
@@ -518,6 +604,7 @@
       <button class="nav-item" onclick="openTab('crm', this)">👥 Mini-CRM & Chats</button>
       <button class="nav-item" onclick="openTab('automation', this)">⚡ Automatisations & Audio</button>
       <button class="nav-item" onclick="openTab('billing', this)">💳 Abonnements</button>
+      <button class="nav-item" id="nav-admin-btn" style="display:none;border:1px dashed var(--green);color:var(--green);" onclick="openTab('admin', this)">👑 Admin Clients</button>
     </div>
 
     <div class="sidebar-footer">
@@ -545,11 +632,28 @@
         <button class="btn btn-outline" onclick="openTab('playground', document.querySelectorAll('.nav-item')[2])">🧪 Tester mon IA en direct</button>
       </div>
 
+      <div id="welcome-new-user-banner" style="display:none;background:linear-gradient(135deg, rgba(37,211,102,0.18), rgba(16,185,129,0.08));border:2px solid var(--green);color:var(--text);padding:18px 20px;border-radius:16px;margin-bottom:20px;box-shadow:0 8px 28px rgba(37,211,102,0.15);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:18px;font-weight:800;color:var(--green);margin-bottom:6px;" id="welcome-banner-title">🎉 Bienvenue sur WhaBot Pro ! Votre compte a été créé avec succès !</div>
+            <div style="font-size:13.5px;color:var(--text);line-height:1.55;">
+              ✅ Votre essai gratuit est actif : <strong>20 réponses IA offertes</strong> + <strong>5 Mo d'espace de stockage</strong> pour votre Boutique E-Commerce.<br>
+              👉 <strong>Prochaine étape :</strong> Reliez votre numéro WhatsApp juste en dessous (avec le Code à 8 caractères ou le QR Code) ou cliquez sur <strong>🧪 Tester mon IA en direct</strong> !
+            </div>
+          </div>
+          <button class="btn" style="padding:8px 14px;font-size:12.5px;white-space:nowrap;" onclick="document.getElementById('welcome-new-user-banner').style.display='none'">✓ Merci, j'ai compris !</button>
+        </div>
+      </div>
+
+      <div id="quota-warning-banner" style="display:none;background:rgba(239,68,68,0.15);border:1px solid #ef4444;color:#f87171;padding:14px 18px;border-radius:12px;margin-bottom:18px;font-size:14px;font-weight:600;">
+        ⚠️ Votre essai gratuit de 20 réponses IA est épuisé (ou votre compte est suspendu). L'assistant IA ne répond plus automatiquement. Rendez-vous dans l'onglet <strong>💳 Abonnements</strong> pour activer votre forfait !
+      </div>
+
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-top"><span>💬 Réponses IA envoyées</span><span>⚡</span></div>
           <div class="stat-val" id="stat-messages">0</div>
-          <div class="stat-sub">Traités automatiquement</div>
+          <div class="stat-sub" id="stat-quota-sub">Traités automatiquement</div>
         </div>
         <div class="stat-card">
           <div class="stat-top"><span>👥 Contacts dans le CRM</span><span>📒</span></div>
@@ -569,18 +673,123 @@
       </div>
 
       <div class="card">
-        <h3>📱 Relier votre numéro WhatsApp</h3>
-        <p class="card-desc">Cliquez sur « Générer le QR Code » puis scannez-le depuis WhatsApp (Appareils connectés → Connecter un appareil).</p>
+        <h3>📱 Relier votre numéro WhatsApp (2 méthodes au choix)</h3>
+        <p class="card-desc">Vous avez un seul téléphone ? Utilisez le <strong>Code à 8 caractères</strong> (aucun scan requis). Vous êtes sur PC ? Utilisez le <strong>QR Code</strong>.</p>
 
         <div id="bot-status-area" style="margin-bottom:18px;">
           <div class="status-badge disconnected"><span class="dot"></span> Non connecté</div>
         </div>
 
+        <!-- Boîte d'affichage du Code à 8 caractères ou du QR Code -->
         <div id="qr-container" style="display:none; text-align:center; padding:24px; background:var(--input-bg); border-radius:16px; border:1px solid var(--border); margin-bottom:18px;"></div>
 
-        <div style="display:flex; gap:12px; flex-wrap:wrap;">
-          <button class="btn" onclick="startBot()">🔗 Générer le QR Code / Connecter WhatsApp</button>
-          <button class="btn btn-danger" onclick="stopBot()">⏹ Déconnecter / Arrêter le bot</button>
+        <div class="form-grid" style="margin-bottom:16px;">
+          <!-- Méthode 1 : 1 seul téléphone (Code à 8 chiffres) -->
+          <div style="background:var(--input-bg); border:1px solid var(--border); border-radius:14px; padding:18px;">
+            <div style="font-weight:700; font-size:14px; color:var(--green); margin-bottom:6px;">📲 Méthode 1 : J'ai un seul téléphone (Sans scanner)</div>
+            <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">Choisissez l'indicatif de votre pays et entrez votre numéro WhatsApp pour recevoir un code à 8 caractères :</p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <select id="pair-country-code" style="width:175px; flex-shrink:0;">
+                <option value="229" selected>🇧🇯 Bénin (+229)</option>
+                <optgroup label="🌍 Afrique">
+                  <option value="225">🇨🇮 Côte d'Ivoire (+225)</option>
+                  <option value="228">🇹🇬 Togo (+228)</option>
+                  <option value="221">🇸🇳 Sénégal (+221)</option>
+                  <option value="226">🇧🇫 Burkina Faso (+226)</option>
+                  <option value="223">🇲🇱 Mali (+223)</option>
+                  <option value="227">🇳🇪 Niger (+227)</option>
+                  <option value="224">🇬🇳 Guinée (+224)</option>
+                  <option value="237">🇨🇲 Cameroun (+237)</option>
+                  <option value="241">🇬🇦 Gabon (+241)</option>
+                  <option value="242">🇨🇬 Congo-Brazzaville (+242)</option>
+                  <option value="243">🇨🇩 RD Congo (+243)</option>
+                  <option value="234">🇳🇬 Nigeria (+234)</option>
+                  <option value="233">🇬🇭 Ghana (+233)</option>
+                  <option value="212">🇲🇦 Maroc (+212)</option>
+                  <option value="213">🇩🇿 Algérie (+213)</option>
+                  <option value="216">🇹🇳 Tunisie (+216)</option>
+                  <option value="222">🇲🇷 Mauritanie (+222)</option>
+                  <option value="235">🇹🇩 Tchad (+235)</option>
+                  <option value="236">🇨🇫 Centrafrique (+236)</option>
+                  <option value="240">🇬🇶 Guinée Équatoriale (+240)</option>
+                  <option value="245">🇬🇼 Guinée-Bissau (+245)</option>
+                  <option value="250">🇷🇼 Rwanda (+250)</option>
+                  <option value="257">🇧🇮 Burundi (+257)</option>
+                  <option value="253">🇩🇯 Djibouti (+253)</option>
+                  <option value="261">🇲🇬 Madagascar (+261)</option>
+                  <option value="269">🇰🇲 Comores (+269)</option>
+                  <option value="230">🇲🇺 Île Maurice (+230)</option>
+                  <option value="254">🇰🇪 Kenya (+254)</option>
+                  <option value="255">🇹🇿 Tanzanie (+255)</option>
+                  <option value="256">🇺🇬 Ouganda (+256)</option>
+                  <option value="251">🇪🇹 Éthiopie (+251)</option>
+                  <option value="20">🇪🇬 Égypte (+20)</option>
+                  <option value="27">🇿🇦 Afrique du Sud (+27)</option>
+                  <option value="244">🇦🇴 Angola (+244)</option>
+                  <option value="258">🇲🇿 Mozambique (+258)</option>
+                  <option value="238">🇨🇻 Cap-Vert (+238)</option>
+                  <option value="220">🇬🇲 Gambie (+220)</option>
+                  <option value="231">🇱🇷 Liberia (+231)</option>
+                  <option value="232">🇸🇱 Sierra Leone (+232)</option>
+                </optgroup>
+                <optgroup label="🇪🇺 Europe">
+                  <option value="33">🇫🇷 France (+33)</option>
+                  <option value="32">🇧🇪 Belgique (+32)</option>
+                  <option value="41">🇨🇭 Suisse (+41)</option>
+                  <option value="44">🇬🇧 Royaume-Uni (+44)</option>
+                  <option value="49">🇩🇪 Allemagne (+49)</option>
+                  <option value="34">🇪🇸 Espagne (+34)</option>
+                  <option value="39">🇮🇹 Italie (+39)</option>
+                  <option value="351">🇵🇹 Portugal (+351)</option>
+                  <option value="31">🇳🇱 Pays-Bas (+31)</option>
+                  <option value="352">🇱🇺 Luxembourg (+352)</option>
+                  <option value="46">🇸🇪 Suède (+46)</option>
+                  <option value="47">🇳🇴 Norvège (+47)</option>
+                  <option value="45">🇩🇰 Danemark (+45)</option>
+                  <option value="48">🇵🇱 Pologne (+48)</option>
+                  <option value="90">🇹🇷 Turquie (+90)</option>
+                  <option value="7">🇷🇺 Russie (+7)</option>
+                </optgroup>
+                <optgroup label="🌎 Amériques">
+                  <option value="1">🇺🇸🇨🇦 USA / Canada (+1)</option>
+                  <option value="55">🇧🇷 Brésil (+55)</option>
+                  <option value="52">🇲🇽 Mexique (+52)</option>
+                  <option value="54">🇦🇷 Argentine (+54)</option>
+                  <option value="57">🇨🇴 Colombie (+57)</option>
+                  <option value="509">🇭🇹 Haïti (+509)</option>
+                  <option value="590">🇬🇵 Guadeloupe (+590)</option>
+                  <option value="596">🇲🇶 Martinique (+596)</option>
+                  <option value="594">🇬🇫 Guyane (+594)</option>
+                </optgroup>
+                <optgroup label="🌏 Asie & Moyen-Orient">
+                  <option value="971">🇦🇪 Dubaï / EAU (+971)</option>
+                  <option value="966">🇸🇦 Arabie Saoudite (+966)</option>
+                  <option value="974">🇶🇦 Qatar (+974)</option>
+                  <option value="961">🇱🇧 Liban (+961)</option>
+                  <option value="86">🇨🇳 Chine (+86)</option>
+                  <option value="91">🇮🇳 Inde (+91)</option>
+                  <option value="81">🇯🇵 Japon (+81)</option>
+                  <option value="82">🇰🇷 Corée du Sud (+82)</option>
+                  <option value="61">🇦🇺 Australie (+61)</option>
+                </optgroup>
+                <option value="">🌐 Autre (saisir indicatif complet)</option>
+              </select>
+              <input type="tel" id="pair-phone-input" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Ex: 62836380" style="flex:1; min-width:140px;">
+              <button class="btn" onclick="getPairingCode()" style="white-space:nowrap; width:100%;">🔑 Obtenir le Code à 8 caractères</button>
+            </div>
+          </div>
+
+          <!-- Méthode 2 : QR Code -->
+          <div style="background:var(--input-bg); border:1px solid var(--border); border-radius:14px; padding:18px; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="font-weight:700; font-size:14px; color:var(--text); margin-bottom:6px;">📷 Méthode 2 : Scanner un QR Code (PC / 2 téléphones)</div>
+              <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">Affiche un QR Code à l'écran à scanner avec l'appareil photo de votre WhatsApp.</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-outline" style="flex:1;" onclick="startBot()">📷 Afficher le QR Code</button>
+              <button class="btn btn-danger" onclick="stopBot()">⏹ Arrêter</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -685,6 +894,54 @@
         </div>
 
         <button class="btn btn-block" onclick="saveConfig()">💾 Sauvegarder le Cerveau IA</button>
+      </div>
+
+      <!-- SECTION E-COMMERCE : PRODUITS AVEC PHOTOS ENVOYÉES AUTOMATIQUEMENT PAR L'IA -->
+      <div class="card" id="card-product-photos">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:10px;">
+          <div>
+            <h3>🛍️ Boutique E-Commerce — Vos Produits avec Photos (Envoi auto sur WhatsApp)</h3>
+            <p class="card-desc" style="margin-bottom:0;">Ajoutez ici les photos, prix et détails de vos articles. Lorsqu'un client demande un produit sur WhatsApp, <strong>l'IA lui enverra automatiquement la vraie photo du produit avec toutes ses informations !</strong></p>
+          </div>
+          <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:10px 14px;min-width:230px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;">
+              <span>💾 Stockage Boutique :</span>
+              <strong id="client-storage-text" style="color:var(--green);">0.00 / 5 Mo</strong>
+            </div>
+            <div style="width:100%;height:7px;background:#070d12;border-radius:99px;overflow:hidden;">
+              <div id="client-storage-bar" style="width:2%;height:100%;background:var(--green);transition:0.3s;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:18px;">
+          <h4 style="font-size:14px;color:var(--green);margin-bottom:12px;">➕ Ajouter un produit à votre boutique IA</h4>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>🏷️ Nom de l'article / service</label>
+              <input type="text" id="prod-name" placeholder="Ex: Montre Rolex Or, Perruque 24 pouces, iPhone 15...">
+            </div>
+            <div class="form-group">
+              <label>💰 Prix (avec devise)</label>
+              <input type="text" id="prod-price" placeholder="Ex: 25 000 FCFA">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>📝 Informations complètes (Couleurs, Tailles, Stock, Livraison, Arguments pour convaincre)</label>
+            <textarea id="prod-desc" rows="2" placeholder="Ex: Disponible en Noir et Or, étanche, boîte incluse. Livraison gratuite à Cotonou en 2h, paiement à la livraison ou MoMo."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>📸 Photo du produit (JPG, PNG, WebP depuis votre téléphone ou PC)</label>
+            <input type="file" id="prod-photo-file" accept="image/*" style="padding:9px;">
+          </div>
+
+          <button type="button" class="btn" onclick="addEcommerceProduct()">➕ Ajouter ce produit avec sa photo</button>
+        </div>
+
+        <h4 style="font-size:14px;margin-bottom:10px;">📦 Produits enregistrés dans la mémoire de votre IA (<span id="prod-count">0</span>) :</h4>
+        <div id="products-gallery-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;"></div>
       </div>
     </section>
 
@@ -885,7 +1142,7 @@
         </div>
       </div>
 
-      <div class="plans-grid">
+      <div class="plans-grid" id="billing-plans-grid">
         <div class="plan-card">
           <div>
             <h3>Starter</h3>
@@ -900,37 +1157,178 @@
           </div>
           <button class="btn btn-outline btn-block" onclick="showPayment('Starter', '5 000')">Choisir Starter</button>
         </div>
+      </div>
+    </section>
 
-        <div class="plan-card popular">
-          <div class="popular-tag">⭐ PLUS POPULAIRE</div>
+    <!-- ONGLET 7 : PANNEAU ADMIN (RÉSERVÉ AU FONDATEUR) -->
+    <section id="tab-admin" class="tab-pane">
+      <div class="page-header">
+        <div>
+          <h2>👑 Panneau Administrateur — Clients & Forfaits</h2>
+          <p>Gérez vos clients inscrits, personnalisez vos forfaits (prix, quotas, fonctionnalités incluses) ou créez de nouvelles offres.</p>
+        </div>
+        <button class="btn btn-outline" onclick="loadAdminUsers()">🔄 Actualiser tout</button>
+      </div>
+
+      <div id="admin-alert" class="msg"></div>
+
+      <!-- 1. GESTION DES CLIENTS -->
+      <div class="card">
+        <h3>👥 Clients inscrits sur WhaBot Pro (<span id="admin-total-users">0</span>)</h3>
+        <p class="card-desc">Chaque nouveau client inscrit avec votre lien dispose automatiquement de <strong>20 messages gratuits (Essai)</strong> et d'<strong>1 seul numéro WhatsApp</strong>. Cliquez sur un forfait à droite d'un client pour l'activer immédiatement.</p>
+        <div id="admin-users-list" style="display:flex;flex-direction:column;gap:12px;">
+          <div style="padding:20px;text-align:center;color:var(--muted);">Chargement des clients...</div>
+        </div>
+      </div>
+
+      <!-- 2. CRÉATION & MODIFICATION DES FORFAITS -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
           <div>
-            <h3>Pro Illimité</h3>
-            <div class="plan-price">15 000 FCFA <small>/ mois</small></div>
-            <ul class="plan-features">
-              <li>1 Numéro WhatsApp connecté</li>
-              <li>Messages IA illimités 24h/24</li>
-              <li>🎙️ Lecture des Notes Vocales</li>
-              <li>📸 Analyse d'Images & Reçus</li>
-              <li>Mini-CRM & Messagerie Live</li>
-              <li>Support prioritaire WhatsApp</li>
-            </ul>
+            <h3>🏷️ Gestion des Forfaits, Prix & Fonctionnalités</h3>
+            <p class="card-desc" style="margin-bottom:0;">Modifiez vos forfaits existants (Starter, Pro, Business) ou ajoutez de nouveaux forfaits. Les changements s'appliquent instantanément sur la page <strong>💳 Abonnements</strong> de tous vos clients !</p>
           </div>
-          <button class="btn btn-block" onclick="showPayment('Pro Illimité', '15 000')">Souscrire au Plan Pro</button>
+          <button class="btn btn-outline" onclick="resetPlanForm()">➕ Nouveau Forfait</button>
         </div>
 
-        <div class="plan-card">
-          <div>
-            <h3>Business Agence</h3>
-            <div class="plan-price">35 000 FCFA <small>/ mois</small></div>
-            <ul class="plan-features">
-              <li>Jusqu'à 3 Numéros WhatsApp</li>
-              <li>Messages, Vocaux & Images illimités</li>
-              <li>Configuration sur-mesure incluse</li>
-              <li>Formation de votre équipe</li>
-              <li>Accompagnement VIP dédié</li>
-            </ul>
+        <!-- Liste des forfaits actuels avec bouton Modifier / Supprimer -->
+        <div id="admin-plans-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:22px;"></div>
+
+        <!-- Formulaire d'édition / création d'un forfait -->
+        <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:16px;padding:20px;">
+          <h4 id="plan-form-title" style="margin-bottom:14px;color:var(--green);font-size:15px;">➕ Créer un nouveau forfait (ou cliquez sur "Modifier" sur un forfait ci-dessus)</h4>
+          <input type="hidden" id="plan-id" value="">
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>🏷️ Nom du forfait</label>
+              <input type="text" id="plan-name" placeholder="Ex: Starter, Pack Gold, VIP...">
+            </div>
+            <div class="form-group">
+              <label>💰 Prix (en FCFA ou autre)</label>
+              <input type="text" id="plan-price" placeholder="Ex: 5 000, 10 000, 25 000">
+            </div>
           </div>
-          <button class="btn btn-outline btn-block" onclick="showPayment('Business Agence', '35 000')">Choisir Business</button>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>💬 Quota de réponses IA incluses (mettez 999999 pour Illimité)</label>
+              <input type="number" id="plan-max-msg" placeholder="Ex: 500 ou 999999" value="500">
+            </div>
+            <div class="form-group">
+              <label>💾 Espace de stockage Boutique inclus (en Mo)</label>
+              <input type="number" id="plan-max-storage" placeholder="Ex: 10, 50, 200" value="10">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>📅 Période affichée</label>
+            <input type="text" id="plan-period" value="FCFA / mois" placeholder="Ex: FCFA / mois">
+          </div>
+
+          <label style="margin-bottom:8px;">⚙️ Catalogue des 8 Fonctionnalités Réelles (Cochez pour débloquer réellement chez le client + afficher sur la carte) :</label>
+          <div class="form-grid" style="margin-bottom:16px;">
+            <div class="switch-row">
+              <div>
+                <div class="switch-title">📦 1. Catalogue Produits, Prix & FAQ</div>
+                <div class="switch-desc">Débloque l'entraînement sur les prix et produits de l'entreprise</div>
+              </div>
+              <input type="checkbox" class="toggle" id="plan-catalog" checked onchange="syncRealFeatureSwitch(this, '📦 Catalogue produits & FAQ sur-mesure')">
+            </div>
+            <div class="switch-row">
+              <div>
+                <div class="switch-title">⚡ 2. Modèles Métiers en 1 Clic</div>
+                <div class="switch-desc">Débloque les 6 modèles (Voyage, E-commerce, Resto, Immo, Clinique)</div>
+              </div>
+              <input type="checkbox" class="toggle" id="plan-templates" checked onchange="syncRealFeatureSwitch(this, '⚡ Modèles métiers en 1 clic')">
+            </div>
+            <div class="switch-row">
+              <div>
+                <div class="switch-title">🧪 3. Simulateur IA Live</div>
+                <div class="switch-desc">Débloque l'onglet de test de l'IA en direct dans le navigateur</div>
+              </div>
+              <input type="checkbox" class="toggle" id="plan-playground" checked onchange="syncRealFeatureSwitch(this, '🧪 Simulateur IA Live inclus')">
+            </div>
+            <div class="switch-row">
+              <div>
+                <div class="switch-title">👥 4. Mini-CRM & Messagerie Live</div>
+                <div class="switch-desc">Débloque l'historique des chats, la pause par client et l'envoi manuel</div>
+              </div>
+              <input type="checkbox" class="toggle" id="plan-crm" checked onchange="syncRealFeatureSwitch(this, '👥 Mini-CRM & Messagerie Live')">
+            </div>
+            <div class="switch-row">
+              <div>
+                <div class="switch-title">🤝 5. Relais Humain Automatique</div>
+                <div class="switch-desc">Pause automatique de 15/30/60 min quand le patron répond lui-même</div>
+              </div>
+              <input type="checkbox" class="toggle" id="plan-human" checked onchange="syncRealFeatureSwitch(this, '🤝 Relais humain automatique (Pause 15 min)')">
+            </div>
+            <div class="switch-row">
+              <div>
+                <div class="switch-title">🎙️ 6. Lecture des Notes Vocales IA</div>
+                <div class="switch-desc">L'IA écoute et répond aux messages vocaux WhatsApp des clients</div>
+              </div>
+              <input type="checkbox" class="toggle" id="plan-voice" checked onchange="syncRealFeatureSwitch(this, '🎙️ Lecture des Notes Vocales WhatsApp')">
+            </div>
+            <div class="switch-row">
+              <div>
+                <div class="switch-title">📸 7. Analyse d'Images & Reçus IA</div>
+                <div class="switch-desc">L'IA analyse les photos d'articles et reçus Mobile Money envoyés</div>
+              </div>
+              <input type="checkbox" class="toggle" id="plan-images" checked onchange="syncRealFeatureSwitch(this, '📸 Analyse d\'Images & Reçus Mobile Money')">
+            </div>
+            <div class="switch-row">
+              <div>
+                <div class="switch-title">🛡️ 8. Liste Noire, Blanche & Consignes VIP</div>
+                <div class="switch-desc">Débloque le filtrage avancé des numéros et les consignes spéciales par contact</div>
+              </div>
+              <input type="checkbox" class="toggle" id="plan-filter" checked onchange="syncRealFeatureSwitch(this, '🛡️ Liste Noire, Liste Blanche & Consignes VIP')">
+            </div>
+            <div class="switch-row">
+              <div>
+                <div class="switch-title">🛍️ 9. Boutique Photos Produits (E-Commerce)</div>
+                <div class="switch-desc">Permet d'ajouter des photos produits que l'IA envoie toute seule aux clients WhatsApp</div>
+              </div>
+              <input type="checkbox" class="toggle" id="plan-product-photos" checked onchange="syncRealFeatureSwitch(this, '🛍️ Catalogue Photos Produits (Envoi auto par l\'IA)')">
+            </div>
+          </div>
+
+          <div class="switch-row" style="margin-bottom:16px;">
+            <div>
+              <div class="switch-title">⭐ Mettre en avant avec le badge « PLUS POPULAIRE »</div>
+              <div class="switch-desc">Encadre ce forfait en vert sur la page Abonnements</div>
+            </div>
+            <input type="checkbox" class="toggle" id="plan-popular">
+          </div>
+
+          <div class="form-group">
+            <label>✅ Fonctionnalités incluses dans ce forfait (Cliquez sur un bouton pour Ajouter / Retirer, ou cliquez sur ❌ pour supprimer)</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+              <button type="button" class="chip-btn" onclick="toggleFeatureLine('1 Numéro WhatsApp connecté')">⚡ 1 Numéro WhatsApp</button>
+              <button type="button" class="chip-btn" onclick="toggleFeatureLine('Messages IA illimités 24h/24')">⚡ Messages Illimités</button>
+              <button type="button" class="chip-btn" onclick="toggleFeatureLine('🎙️ Lecture des Notes Vocales')">🎙️ Notes Vocales</button>
+              <button type="button" class="chip-btn" onclick="toggleFeatureLine('📸 Analyse d\'Images & Reçus')">📸 Analyse Images</button>
+              <button type="button" class="chip-btn" onclick="toggleFeatureLine('Mini-CRM & Messagerie Live')">👥 Mini-CRM</button>
+              <button type="button" class="chip-btn" onclick="toggleFeatureLine('Relais humain automatique (Pause 15 min)')">🤝 Relais Humain</button>
+              <button type="button" class="chip-btn" onclick="toggleFeatureLine('Catalogue produits & FAQ sur-mesure')">📦 Catalogue & FAQ</button>
+              <button type="button" class="chip-btn" onclick="toggleFeatureLine('Support prioritaire WhatsApp 24/7')">⭐ Support VIP</button>
+            </div>
+
+            <!-- Liste visuelle avec bouton ❌ Retirer en 1 clic -->
+            <div id="plan-features-visual" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
+
+            <!-- Ajout d'une ligne personnalisée -->
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <input type="text" id="custom-feature-input" placeholder="Écrire une autre fonctionnalité à ajouter..." onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomFeatureInput();}">
+              <button type="button" class="btn btn-outline" style="white-space:nowrap;" onclick="addCustomFeatureInput()">➕ Ajouter</button>
+            </div>
+            <textarea id="plan-features" rows="3" style="display:none;"></textarea>
+          </div>
+
+          <div style="display:flex;gap:10px;">
+            <button class="btn" onclick="saveAdminPlan()">💾 Enregistrer ce Forfait</button>
+            <button class="btn btn-secondary" onclick="resetPlanForm()">Annuler / Vider</button>
+          </div>
         </div>
       </div>
     </section>
@@ -946,6 +1344,7 @@
   let statusPollInterval = null;
   let crmConversations = [];
   let selectedCrmJid = null;
+  let userProducts = [];
 
   const TEMPLATES = {
     travel: {
@@ -992,7 +1391,75 @@
     }
   };
 
+  let loginMode = 'email';
+  let forgotMode = 'phone';
+
+  function togglePasswordVisibility(inputId, btnEl) {
+    const inp = document.getElementById(inputId);
+    if (!inp) return;
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      if (btnEl) {
+        btnEl.textContent = '🙈';
+        btnEl.style.color = 'var(--green)';
+      }
+    } else {
+      inp.type = 'password';
+      if (btnEl) {
+        btnEl.textContent = '👁️';
+        btnEl.style.color = 'var(--muted)';
+      }
+    }
+  }
+
+  function initCountrySelects() {
+    const master = document.getElementById('pair-country-code');
+    if (!master) return;
+    document.querySelectorAll('.country-code-select').forEach(sel => {
+      sel.innerHTML = master.innerHTML;
+      sel.value = '229';
+    });
+  }
+
+  function formatDialAndPhone(dialCode, rawDigits) {
+    let d = String(rawDigits || '').replace(/[^0-9]/g, '');
+    if (!d) return '';
+    if (dialCode && !d.startsWith(dialCode)) {
+      if (dialCode === '229' && d.startsWith('01') && d.length === 10) {
+        d = d.slice(2);
+      } else if (['33', '32', '41', '44', '212', '213', '225'].includes(dialCode) && d.startsWith('0') && d.length > 9) {
+        d = d.slice(1);
+      }
+      return dialCode + d;
+    }
+    if (d.startsWith('22901') && d.length === 13) {
+      return '229' + d.slice(5);
+    }
+    return d;
+  }
+
+  function setLoginMode(mode) {
+    loginMode = mode;
+    document.getElementById('login-email-group').style.display = mode === 'email' ? 'block' : 'none';
+    document.getElementById('login-phone-group').style.display = mode === 'phone' ? 'block' : 'none';
+    document.getElementById('login-mode-email').style.borderColor = mode === 'email' ? 'var(--green)' : 'var(--border)';
+    document.getElementById('login-mode-email').style.color = mode === 'email' ? 'var(--green)' : 'var(--text)';
+    document.getElementById('login-mode-phone').style.borderColor = mode === 'phone' ? 'var(--green)' : 'var(--border)';
+    document.getElementById('login-mode-phone').style.color = mode === 'phone' ? 'var(--green)' : 'var(--text)';
+  }
+
+  function setForgotMode(mode) {
+    forgotMode = mode;
+    document.getElementById('forgot-phone-group').style.display = mode === 'phone' ? 'block' : 'none';
+    document.getElementById('forgot-email-group').style.display = mode === 'email' ? 'block' : 'none';
+    document.getElementById('forgot-mode-phone').style.borderColor = mode === 'phone' ? 'var(--green)' : 'var(--border)';
+    document.getElementById('forgot-mode-phone').style.color = mode === 'phone' ? 'var(--green)' : 'var(--text)';
+    document.getElementById('forgot-mode-email').style.borderColor = mode === 'email' ? 'var(--green)' : 'var(--border)';
+    document.getElementById('forgot-mode-email').style.color = mode === 'email' ? 'var(--green)' : 'var(--text)';
+  }
+
   window.onload = () => {
+    initCountrySelects();
     if (token) loadDashboard();
     else showAuthScreen();
   };
@@ -1012,10 +1479,37 @@
     document.getElementById('tab-btn-register').classList.toggle('active', tab === 'register');
     document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
     document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+    const forgotEl = document.getElementById('form-forgot');
+    if (forgotEl) forgotEl.style.display = tab === 'forgot' ? 'block' : 'none';
     document.getElementById('auth-alert').className = 'msg';
+    const regFb = document.getElementById('register-feedback');
+    if (regFb) regFb.className = 'msg';
+  }
+
+  function goToLoginPrefilled(email, rawPhone, dial) {
+    switchAuthTab('login');
+    if (email) {
+      setLoginMode('email');
+      document.getElementById('login-email').value = email;
+    } else if (rawPhone) {
+      setLoginMode('phone');
+      if (dial) document.getElementById('login-country-code').value = dial;
+      document.getElementById('login-phone').value = rawPhone;
+    }
+    document.getElementById('login-password').focus();
+    showMsg('auth-alert', '✅ Votre compte existe déjà ! Entrez votre mot de passe ci-dessous pour vous connecter.', 'success');
   }
 
   function openTab(tabId, btnEl) {
+    const perms = currentUser?.permissions || {};
+    if (tabId === 'playground' && perms.allowPlayground === false) {
+      alert('🔒 Le Simulateur IA Live n\'est pas inclus dans votre forfait actuel. Passez au forfait supérieur dans l\'onglet Abonnements !');
+      return;
+    }
+    if (tabId === 'crm' && perms.allowCRM === false) {
+      alert('🔒 Le Mini-CRM & Messagerie Live n\'est pas inclus dans votre forfait actuel. Passez au forfait supérieur dans l\'onglet Abonnements !');
+      return;
+    }
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + tabId).classList.add('active');
     if (btnEl) {
@@ -1023,19 +1517,28 @@
       btnEl.classList.add('active');
     }
     if (tabId === 'crm') loadCRM();
+    if (tabId === 'billing') loadPublicPlans();
+    if (tabId === 'admin') loadAdminUsers();
   }
 
-  // ── AUTHENTIFICATION ──
+  // ── AUTHENTIFICATION (EMAIL OU TÉLÉPHONE + RÉCUPÉRATION MOT DE PASSE) ──
   async function doLogin() {
-    const email = document.getElementById('login-email').value.trim();
+    let identifier = '';
+    if (loginMode === 'phone') {
+      const dial = document.getElementById('login-country-code').value;
+      const digits = document.getElementById('login-phone').value;
+      identifier = formatDialAndPhone(dial, digits);
+    } else {
+      identifier = document.getElementById('login-email').value.trim();
+    }
     const password = document.getElementById('login-password').value;
-    if (!email || !password) return showMsg('auth-alert', 'Veuillez remplir votre email et mot de passe.', 'error');
+    if (!identifier || !password) return showMsg('auth-alert', 'Veuillez remplir votre identifiant et votre mot de passe.', 'error');
 
     try {
       const r = await fetch(`${API}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ identifier, email: identifier, password })
       });
       const data = await r.json();
       if (!r.ok) return showMsg('auth-alert', data.error || 'Identifiants incorrects', 'error');
@@ -1051,22 +1554,162 @@
     const name = document.getElementById('reg-name').value.trim();
     const company = document.getElementById('reg-company').value.trim();
     const email = document.getElementById('reg-email').value.trim();
+    const dial = document.getElementById('reg-country-code').value;
+    const rawPhone = document.getElementById('reg-phone').value.trim();
+    const phone = rawPhone ? formatDialAndPhone(dial, rawPhone) : '';
     const password = document.getElementById('reg-password').value;
-    if (!name || !email || !password) return showMsg('auth-alert', 'Veuillez remplir tous les champs obligatoires.', 'error');
+    const btn = document.getElementById('btn-register-submit');
+    const regFb = document.getElementById('register-feedback');
+
+    if (!name || !password) {
+      const msg = '⚠️ Veuillez renseigner votre prénom/nom et un mot de passe (6 caractères min).';
+      showMsg('auth-alert', msg, 'error');
+      showMsg('register-feedback', msg, 'error');
+      return;
+    }
+    if (!rawPhone || rawPhone.length < 6) {
+      const msg = '📱 Le Numéro WhatsApp est obligatoire pour s\'inscrire ! (Vous devez mettre Numéro + Email, ou Numéro seul, mais pas Email seul).';
+      showMsg('auth-alert', msg, 'error');
+      showMsg('register-feedback', msg, 'error');
+      const phoneInput = document.getElementById('reg-phone');
+      if (phoneInput) {
+        phoneInput.style.borderColor = '#ef4444';
+        phoneInput.focus();
+      }
+      return;
+    }
+    if (password.length < 6) {
+      const msg = '⚠️ Votre mot de passe doit contenir au moins 6 caractères.';
+      showMsg('auth-alert', msg, 'error');
+      showMsg('register-feedback', msg, 'error');
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = '⏳ Création de votre compte en cours...';
+    }
 
     try {
       const r = await fetch(`${API}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, company, email, password })
+        body: JSON.stringify({ name, company, email, phone, password })
       });
       const data = await r.json();
-      if (!r.ok) return showMsg('auth-alert', data.error || 'Erreur lors de la création', 'error');
+      if (!r.ok) {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Créer mon compte gratuit 🚀';
+        }
+        if (r.status === 409) {
+          const alreadyHtml = `ℹ️ <strong>${escapeHtml(data.error || 'Ce compte a déjà été créé !')}</strong><br><button type="button" class="btn" style="margin-top:8px;padding:7px 14px;font-size:12.5px;" onclick="goToLoginPrefilled('${escapeHtml(email)}', '${escapeHtml(rawPhone)}', '${escapeHtml(dial)}')">👉 Aller à la Connexion avec mon compte →</button>`;
+          if (regFb) {
+            regFb.innerHTML = alreadyHtml;
+            regFb.className = 'msg error';
+          }
+          const topEl = document.getElementById('auth-alert');
+          if (topEl) {
+            topEl.innerHTML = alreadyHtml;
+            topEl.className = 'msg error';
+          }
+          return;
+        }
+        showMsg('auth-alert', data.error || 'Erreur lors de la création', 'error');
+        showMsg('register-feedback', data.error || 'Erreur lors de la création', 'error');
+        return;
+      }
+
       token = data.token;
       localStorage.setItem('whabot_token', token);
-      await loadDashboard();
+
+      const welcomeMsg = `🎉 Bienvenue ${name} ! Votre compte a été créé avec succès ! Ouverture de votre espace...`;
+      showMsg('auth-alert', welcomeMsg, 'success');
+      showMsg('register-feedback', welcomeMsg, 'success');
+      if (btn) {
+        btn.textContent = '✅ Compte créé ! Bienvenue 🎉';
+      }
+
+      const banner = document.getElementById('welcome-new-user-banner');
+      const bannerTitle = document.getElementById('welcome-banner-title');
+      if (bannerTitle) bannerTitle.textContent = `🎉 Bienvenue sur WhaBot Pro, ${name} ! Votre compte a bien été créé !`;
+      if (banner) banner.style.display = 'block';
+
+      setTimeout(async () => {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Créer mon compte gratuit 🚀';
+        }
+        await loadDashboard();
+      }, 900);
     } catch (e) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Créer mon compte gratuit 🚀';
+      }
       showMsg('auth-alert', 'Erreur de connexion au serveur.', 'error');
+      showMsg('register-feedback', 'Erreur de connexion au serveur.', 'error');
+    }
+  }
+
+  function getForgotIdentifier() {
+    if (forgotMode === 'phone') {
+      const dial = document.getElementById('forgot-country-code').value;
+      const digits = document.getElementById('forgot-phone').value;
+      return formatDialAndPhone(dial, digits);
+    }
+    return document.getElementById('forgot-id').value.trim();
+  }
+
+  async function requestPasswordResetCode() {
+    const identifier = getForgotIdentifier();
+    const waDial = document.getElementById('forgot-wa-country-code').value;
+    const waDigits = document.getElementById('forgot-wa').value.trim();
+    const whatsappPhone = waDigits ? formatDialAndPhone(waDial, waDigits) : '';
+    if (!identifier) return showMsg('auth-alert', 'Veuillez entrer votre numéro WhatsApp ou votre email.', 'error');
+
+    try {
+      const r = await fetch(`${API}/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, whatsappPhone })
+      });
+      const data = await r.json();
+      if (!r.ok) {
+        if (data.needWhatsappPhone) {
+          const waInput = document.getElementById('forgot-wa');
+          const waBox = document.getElementById('forgot-wa-box');
+          if (waBox) waBox.style.borderColor = '#fbbf24';
+          if (waInput) waInput.focus();
+        }
+        return showMsg('auth-alert', data.error || 'Compte introuvable', 'error');
+      }
+      showMsg('auth-alert', data.message, data.sentViaWhatsApp ? 'success' : 'info');
+    } catch (e) {
+      showMsg('auth-alert', 'Erreur réseau.', 'error');
+    }
+  }
+
+  async function confirmPasswordReset() {
+    const identifier = getForgotIdentifier();
+    const code = document.getElementById('forgot-code').value.trim();
+    const newPassword = document.getElementById('forgot-new-pass').value;
+    if (!identifier || !code || !newPassword) {
+      return showMsg('auth-alert', 'Veuillez remplir votre identifiant, le code à 6 chiffres et le nouveau mot de passe.', 'error');
+    }
+
+    try {
+      const r = await fetch(`${API}/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, code, newPassword })
+      });
+      const data = await r.json();
+      if (!r.ok) return showMsg('auth-alert', data.error || 'Erreur', 'error');
+      showMsg('auth-alert', data.message, 'success');
+      setTimeout(() => switchAuthTab('login'), 2000);
+    } catch (e) {
+      showMsg('auth-alert', 'Erreur réseau.', 'error');
     }
   }
 
@@ -1077,6 +1720,7 @@
       const user = await r.json();
       currentUser = user;
       fillUserForm(user);
+      loadPublicPlans();
       showAppScreen();
       pollStatus();
     } catch (e) {
@@ -1085,8 +1729,10 @@
   }
 
   function fillUserForm(user) {
-    document.getElementById('sidebar-username').textContent = `👤 ${user.name || user.email}`;
-    document.getElementById('sidebar-plan').textContent = `⭐ Plan ${user.plan || 'Essai Pro'}`;
+    document.getElementById('sidebar-username').textContent = `👤 ${user.name || ''} (${user.email})`;
+    document.getElementById('sidebar-plan').textContent = `⭐ ${user.plan || 'Essai (20 msg)'}`;
+    const adminBtn = document.getElementById('nav-admin-btn');
+    if (adminBtn) adminBtn.style.display = user.isAdmin ? 'flex' : 'none';
     const c = user.botConfig || {};
     document.getElementById('cfg-botname').value = c.botName || 'Maya';
     document.getElementById('cfg-company').value = c.companyName || user.company || '';
@@ -1106,7 +1752,27 @@
     const notesLines = Object.entries(c.contactNotes || {}).map(([num, note]) => `${num} : ${note}`);
     document.getElementById('cfg-contact-notes').value = notesLines.join('\n');
 
+    userProducts = Array.isArray(c.products) ? c.products : [];
+    renderProductsGallery();
+    updateClientStorageUI(user.storageUsedMB || 0, user.maxStorageMB || 5);
+
     document.getElementById('pg-bot-title').textContent = `${c.botName || 'Assistant IA'} (${c.companyName || 'Entreprise'})`;
+
+    // Appliquer les permissions réelles du forfait du client sur l'interface
+    const p = user.permissions || {};
+    document.getElementById('cfg-catalog').disabled = (p.allowCatalog === false);
+    document.getElementById('cfg-faq').disabled = (p.allowCatalog === false);
+    document.getElementById('cfg-voice').disabled = (p.allowVoice === false);
+    if (p.allowVoice === false) document.getElementById('cfg-voice').checked = false;
+    document.getElementById('cfg-images').disabled = (p.allowImages === false);
+    if (p.allowImages === false) document.getElementById('cfg-images').checked = false;
+    document.getElementById('cfg-human-pause').disabled = (p.allowHumanTakeover === false);
+    document.getElementById('cfg-filter-mode').disabled = (p.allowAdvancedFilter === false);
+    document.getElementById('cfg-blacklist').disabled = (p.allowAdvancedFilter === false);
+    document.getElementById('cfg-whitelist').disabled = (p.allowAdvancedFilter === false);
+    document.getElementById('cfg-contact-notes').disabled = (p.allowAdvancedFilter === false);
+    const prodCard = document.getElementById('card-product-photos');
+    if (prodCard) prodCard.style.opacity = (p.allowProductPhotos === false) ? '0.5' : '1';
   }
 
   function logout() {
@@ -1120,6 +1786,9 @@
 
   // ── TEMPLATES MÉTIERS ──
   function applyTemplate(key) {
+    if (currentUser?.permissions?.allowTemplates === false) {
+      return alert('🔒 Les Modèles Métiers 1-Clic ne sont pas inclus dans votre forfait actuel.');
+    }
     const t = TEMPLATES[key];
     if (!t) return;
     document.getElementById('cfg-botname').value = t.botName;
@@ -1157,8 +1826,107 @@
       filterMode: document.getElementById('cfg-filter-mode').value,
       blacklist: document.getElementById('cfg-blacklist').value.split(',').map(s => s.replace(/[^0-9]/g, '')).filter(Boolean),
       whitelist: document.getElementById('cfg-whitelist').value.split(',').map(s => s.replace(/[^0-9]/g, '')).filter(Boolean),
-      contactNotes
+      contactNotes,
+      products: userProducts
     };
+  }
+
+  // ── GESTION BOUTIQUE E-COMMERCE (PRODUITS AVEC PHOTOS) ──
+  function compressImageFile(file, maxWidth = 700, quality = 0.78) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width;
+          let h = img.height;
+          if (w > maxWidth) {
+            h = Math.round((h * maxWidth) / w);
+            w = maxWidth;
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function addEcommerceProduct() {
+    if (currentUser?.permissions?.allowProductPhotos === false) {
+      return alert('🔒 La Boutique Photos Produits n\'est pas incluse dans votre forfait actuel.');
+    }
+    const name = document.getElementById('prod-name').value.trim();
+    const price = document.getElementById('prod-price').value.trim();
+    const description = document.getElementById('prod-desc').value.trim();
+    const fileInput = document.getElementById('prod-photo-file');
+    const file = fileInput.files[0];
+
+    if (!name || !price) return alert('Veuillez entrer au moins le nom et le prix du produit.');
+    if (!file) return alert('Veuillez sélectionner une photo pour ce produit.');
+
+    try {
+      const imageDataUrl = await compressImageFile(file);
+      const id = 'prod_' + Date.now().toString().slice(-6);
+      userProducts.push({ id, name, price, description, imageDataUrl });
+      document.getElementById('prod-name').value = '';
+      document.getElementById('prod-price').value = '';
+      document.getElementById('prod-desc').value = '';
+      fileInput.value = '';
+      renderProductsGallery();
+      await saveConfig();
+    } catch (e) {
+      alert('Erreur lors du traitement de la photo.');
+    }
+  }
+
+  async function deleteEcommerceProduct(prodId) {
+    userProducts = userProducts.filter(p => p.id !== prodId);
+    renderProductsGallery();
+    await saveConfig();
+  }
+
+  function renderProductsGallery() {
+    const countEl = document.getElementById('prod-count');
+    if (countEl) countEl.textContent = userProducts.length;
+    const grid = document.getElementById('products-gallery-grid');
+    if (!grid) return;
+    if (userProducts.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;padding:18px;text-align:center;color:var(--muted);font-size:13px;background:var(--input-bg);border-radius:12px;border:1px dashed var(--border);">Aucun produit avec photo ajouté pour le moment.</div>';
+      return;
+    }
+    grid.innerHTML = userProducts.map(p => `
+      <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;">
+        <div>
+          <img src="${p.imageDataUrl}" alt="${escapeHtml(p.name)}" style="width:100%;height:150px;object-fit:cover;border-bottom:1px solid var(--border);">
+          <div style="padding:12px;">
+            <div style="font-weight:700;font-size:14px;color:#fff;">${escapeHtml(p.name)}</div>
+            <div style="color:var(--green);font-weight:800;font-size:13px;margin:4px 0;">${escapeHtml(p.price)}</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.4;">${escapeHtml(p.description || '')}</div>
+          </div>
+        </div>
+        <div style="padding:0 12px 12px;">
+          <button type="button" class="btn btn-danger btn-block" style="padding:6px;font-size:12px;" onclick="deleteEcommerceProduct('${escapeHtml(p.id)}')">🗑️ Supprimer ce produit</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function updateClientStorageUI(usedMB, maxMB) {
+    const txt = document.getElementById('client-storage-text');
+    const bar = document.getElementById('client-storage-bar');
+    if (!txt || !bar) return;
+    const pct = Math.min(100, Math.round((usedMB / Math.max(1, maxMB)) * 100));
+    txt.textContent = `${usedMB} / ${maxMB} Mo (${pct}%)`;
+    bar.style.width = `${Math.max(2, pct)}%`;
+    bar.style.background = pct >= 90 ? '#ef4444' : (pct >= 70 ? '#fbbf24' : 'var(--green)');
   }
 
   async function saveConfig() {
@@ -1170,6 +1938,16 @@
         body: JSON.stringify(cfg)
       });
       const data = await r.json();
+      if (!r.ok) {
+        alert(data.error || 'Erreur lors de la sauvegarde');
+        if (currentUser?.botConfig?.products) {
+          userProducts = [...currentUser.botConfig.products];
+          renderProductsGallery();
+        }
+        return;
+      }
+      if (currentUser) currentUser.botConfig = data.botConfig;
+      if (data.storageUsedMB !== undefined) updateClientStorageUI(data.storageUsedMB, data.maxStorageMB || 5);
       document.getElementById('pg-bot-title').textContent = `${cfg.botName || 'Assistant IA'} (${cfg.companyName || 'Entreprise'})`;
       showMsg('cfg-msg', '✅ ' + (data.message || 'Configuration enregistrée !'), 'success');
       showMsg('auto-msg', '✅ ' + (data.message || 'Automatisations enregistrées !'), 'success');
@@ -1178,7 +1956,65 @@
     }
   }
 
-  // ── CONNEXION WHATSAPP & QR ──
+  // ── CONNEXION WHATSAPP : CODE À 8 CHIFFRES (1 SEUL TÉLÉPHONE) & QR ──
+  async function getPairingCode() {
+    const dialCode = document.getElementById('pair-country-code').value;
+    let rawInput = document.getElementById('pair-phone-input').value.replace(/[^0-9]/g, '');
+    if (!rawInput) return alert('Veuillez entrer votre numéro de téléphone WhatsApp.');
+
+    // Si l'utilisateur a sélectionné un indicatif (ex: 229) et n'a pas déjà tapé 229 au début
+    let phone = rawInput;
+    if (dialCode && !rawInput.startsWith(dialCode)) {
+      // Au Bénin (+229), WhatsApp utilise les 8 chiffres sans le "01" devant
+      if (dialCode === '229' && rawInput.startsWith('01') && rawInput.length === 10) {
+        rawInput = rawInput.slice(2);
+      }
+      // Pour la France/Europe, retirer le 0 initial (ex: 06... -> 336...)
+      if (['33', '32', '41', '44', '212', '213', '225'].includes(dialCode) && rawInput.startsWith('0') && rawInput.length > 9) {
+        rawInput = rawInput.slice(1);
+      }
+      phone = dialCode + rawInput;
+    } else if (phone.startsWith('22901') && phone.length === 13) {
+      phone = '229' + phone.slice(5);
+    }
+    if (qrPollInterval) clearInterval(qrPollInterval);
+
+    document.getElementById('bot-status-area').innerHTML = '<div class="status-badge waiting"><span class="dot"></span> Génération du code à 8 caractères...</div>';
+    const box = document.getElementById('qr-container');
+    box.style.display = 'block';
+    box.innerHTML = '<p style="color:var(--muted);">⏳ Demande du code d\'appairage à WhatsApp en cours (5 à 10 secondes)...</p>';
+
+    try {
+      const r = await fetch(`${API}/bot/pair`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      });
+      const data = await r.json();
+      if (!r.ok) {
+        box.innerHTML = `<p style="color:#f87171;">❌ ${escapeHtml(data.error || 'Erreur')}</p>`;
+        return;
+      }
+      box.innerHTML = `
+        <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Votre code de connexion WhatsApp pour <strong>+${escapeHtml(data.phone)}</strong> :</div>
+        <div style="font-size:32px;font-weight:900;letter-spacing:4px;color:var(--green);background:#080f14;display:inline-block;padding:14px 28px;border-radius:14px;border:2px dashed var(--green);margin-bottom:14px;">${escapeHtml(data.code)}</div>
+        <div>
+          <button class="btn btn-outline" onclick="navigator.clipboard.writeText('${ data.code.replace(/-/g, '') }'); this.textContent='✅ Code copié !'">📋 Copier le code</button>
+        </div>
+        <p style="margin-top:14px;font-size:13px;color:var(--text);line-height:1.7;background:#111b21;padding:12px 16px;border-radius:10px;border:1px solid var(--border);display:inline-block;text-align:left;">
+          <strong>📲 Comment insérer ce code dans WhatsApp :</strong><br>
+          1️⃣ Ouvrez <strong>WhatsApp</strong> (ou <strong>WhatsApp Business</strong>) → <strong>Paramètres (⋮)</strong><br>
+          2️⃣ Appuyez sur <strong>Appareils connectés</strong> → <strong>Connecter un appareil</strong><br>
+          3️⃣ Appuyez en bas sur <strong>« Connecter plutôt avec un numéro de téléphone »</strong><br>
+          4️⃣ Insérez le code <strong>${escapeHtml(data.code)}</strong> ci-dessus !
+        </p>
+      `;
+      startStatusPoll();
+    } catch (e) {
+      box.innerHTML = '<p style="color:#f87171;">❌ Erreur réseau lors de la génération du code.</p>';
+    }
+  }
+
   async function startBot() {
     try {
       const r = await fetch(`${API}/bot/start`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
@@ -1227,7 +2063,12 @@
       const r = await fetch(`${API}/bot/status`, { headers: { 'Authorization': `Bearer ${token}` } });
       if (!r.ok) return;
       const data = await r.json();
-      document.getElementById('stat-messages').textContent = data.messagesHandled || 0;
+      const used = data.messagesHandled || 0;
+      const max = data.maxMessages ?? 20;
+      document.getElementById('stat-messages').textContent = max >= 99999 ? `${used}` : `${used} / ${max}`;
+      document.getElementById('stat-quota-sub').textContent = max >= 99999 ? 'Forfait Illimité actif' : `Quota : ${Math.max(0, max - used)} msg restants`;
+      const warnBanner = document.getElementById('quota-warning-banner');
+      if (warnBanner) warnBanner.style.display = data.quotaReached ? 'block' : 'none';
       document.getElementById('stat-contacts').textContent = data.contactCount || 0;
 
       if (data.isConnected) {
@@ -1276,7 +2117,12 @@
       const el = document.getElementById(loadingId);
       if (el) {
         el.style.color = 'var(--text)';
-        el.textContent = data.reply || data.error || 'Erreur';
+        let html = '';
+        if (Array.isArray(data.images) && data.images.length > 0) {
+          html += data.images.map(img => `<img src="${img.imageDataUrl}" style="max-width:220px;border-radius:10px;display:block;margin-bottom:8px;border:1px solid var(--border);">`).join('');
+        }
+        html += escapeHtml(data.reply || data.error || 'Erreur');
+        el.innerHTML = html;
       }
       box.scrollTop = box.scrollHeight;
     } catch (e) {
@@ -1380,12 +2226,371 @@
     alert(`💳 Abonnement WhaBot ${plan} — ${price} FCFA / mois\n\nMoyens de paiement acceptés :\n• MTN Mobile Money\n• Moov Money\n• Carte Bancaire (Visa / Mastercard)\n\nContactez le support WhaBot sur WhatsApp au +229 62 83 63 80 pour l'activation immédiate.`);
   }
 
+  // ── PANNEAU ADMIN FONDATEUR & GESTION DYNAMIQUE DES FORFAITS ──
+  let cachedPlans = [];
+
+  async function loadPublicPlans() {
+    try {
+      const r = await fetch(`${API}/plans`);
+      if (!r.ok) return;
+      const data = await r.json();
+      cachedPlans = data.plans || [];
+      renderBillingGrid(cachedPlans);
+    } catch (e) {}
+  }
+
+  function renderBillingGrid(plans) {
+    const grid = document.getElementById('billing-plans-grid');
+    if (!grid || !plans.length) return;
+    grid.innerHTML = plans.map(p => `
+      <div class="plan-card ${p.isPopular ? 'popular' : ''}">
+        ${p.isPopular ? '<div class="popular-tag">⭐ PLUS POPULAIRE</div>' : ''}
+        <div>
+          <h3>${escapeHtml(p.name)}</h3>
+          <div class="plan-price">${escapeHtml(p.price)} <small>${escapeHtml(p.period || 'FCFA / mois')}</small></div>
+          <ul class="plan-features">
+            ${(p.features || []).map(f => `<li>${escapeHtml(f)}</li>`).join('')}
+          </ul>
+        </div>
+        <button class="btn ${p.isPopular ? '' : 'btn-outline'} btn-block" onclick="showPayment('${escapeHtml(p.name)}', '${escapeHtml(p.price)}')">Choisir ${escapeHtml(p.name)}</button>
+      </div>
+    `).join('');
+  }
+
+  async function loadAdminUsers() {
+    try {
+      const r = await fetch(`${API}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (!r.ok) return;
+      const data = await r.json();
+      const users = data.users || [];
+      cachedPlans = data.plans || cachedPlans;
+      renderBillingGrid(cachedPlans);
+      renderAdminPlans(cachedPlans);
+
+      document.getElementById('admin-total-users').textContent = users.length;
+      const box = document.getElementById('admin-users-list');
+      if (users.length === 0) {
+        box.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);">Aucun utilisateur inscrit.</div>';
+        return;
+      }
+      box.innerHTML = users.map(u => {
+        const isUnlimited = u.maxMessages >= 99999;
+        const quotaText = isUnlimited ? `${u.messagesUsed} / Illimité` : `${u.messagesUsed} / ${u.maxMessages} msg`;
+        const statusColor = !u.isActive ? '#ef4444' : (u.messagesUsed >= u.maxMessages && !isUnlimited ? '#fbbf24' : 'var(--green)');
+        const planButtonsHtml = cachedPlans.map(p => {
+          const msgLabel = p.maxMessages >= 99999 ? 'Illimité' : p.maxMessages;
+          return `<button class="btn ${p.isPopular ? '' : 'btn-outline'}" style="padding:7px 11px;font-size:12px;" onclick="setUserPlan('${u.id}', '${escapeHtml(p.id)}')">🏷️ ${escapeHtml(p.name)} (${msgLabel})</button>`;
+        }).join('');
+
+        return `
+          <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+            <div>
+              <div style="font-weight:700;font-size:15px;color:#fff;">
+                ${escapeHtml(u.name)} <span style="color:var(--muted);font-weight:400;font-size:13px;">(${escapeHtml(u.email)})</span>
+                ${u.isAdmin ? '<span style="background:var(--green);color:#062011;font-size:10px;padding:2px 7px;border-radius:99px;margin-left:6px;font-weight:800;">FONDATEUR</span>' : ''}
+              </div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px;">
+                🏢 Entreprise : <strong>${escapeHtml(u.company || '-')}</strong> &nbsp;|&nbsp;
+                📞 Tel compte : <strong>${u.accountPhone ? '+' + escapeHtml(u.accountPhone) : '-'}</strong> &nbsp;|&nbsp;
+                📱 Bot WhatsApp : <strong style="color:${u.isConnected ? 'var(--green)' : 'var(--muted)'};">${u.isConnected ? '+' + escapeHtml(u.phone) + ' (En ligne)' : 'Non connecté'}</strong> &nbsp;|&nbsp;
+                💬 Usage : <strong style="color:${statusColor};">${quotaText}</strong> &nbsp;|&nbsp;
+                💾 Stockage : <strong style="color:#38bdf8;">${u.storageUsedMB ?? 0} / ${u.maxStorageMB ?? 5} Mo</strong> &nbsp;|&nbsp;
+                🏷️ Forfait : <strong style="color:${statusColor};">${escapeHtml(u.plan)}</strong>
+                ${u.resetCode ? `&nbsp;|&nbsp; 🔑 Code récup : <strong style="color:#fbbf24;">${escapeHtml(u.resetCode)}</strong>` : ''}
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-outline" style="padding:7px 11px;font-size:12px;" onclick="setUserPlan('${u.id}', 'trial')">🎁 Essai (20 msg)</button>
+              <button class="btn btn-outline" style="padding:7px 11px;font-size:12px;border-color:#38bdf8;color:#38bdf8;" onclick="setCustomQuota('${u.id}', '${escapeHtml(u.email)}', ${u.maxMessages})">✏️ Quota msg</button>
+              <button class="btn btn-outline" style="padding:7px 11px;font-size:12px;border-color:#a855f7;color:#c084fc;" onclick="setCustomStorage('${u.id}', '${escapeHtml(u.email)}', ${u.maxStorageMB ?? 5})">💾 Stockage (Mo)</button>
+              <button class="btn btn-outline" style="padding:7px 11px;font-size:12px;border-color:#fbbf24;color:#fbbf24;" onclick="adminResetPassword('${u.id}', '${escapeHtml(u.email)}')">🔑 Mot de passe</button>
+              ${planButtonsHtml}
+              ${!u.isAdmin ? `<button class="btn btn-danger" style="padding:7px 11px;font-size:12px;" onclick="setUserPlan('${u.id}', 'suspend')">⛔ Suspendre</button>` : ''}
+              ${!u.isAdmin ? `<button class="btn btn-secondary" style="padding:7px 11px;font-size:12px;" onclick="deleteAdminUser('${u.id}', '${escapeHtml(u.email)}')">🗑️</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch (e) {}
+  }
+
+  function renderAdminPlans(plans) {
+    const box = document.getElementById('admin-plans-list');
+    if (!box) return;
+    box.innerHTML = plans.map(p => `
+      <div style="background:var(--input-bg);border:1px solid ${p.isPopular ? 'var(--green)' : 'var(--border)'};border-radius:14px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:16px;color:#fff;">${escapeHtml(p.name)}</strong>
+            <span style="color:var(--green);font-weight:800;font-size:15px;">${escapeHtml(p.price)} FCFA</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin:6px 0;">
+            💬 Quota : <strong>${p.maxMessages >= 99999 ? 'Illimité' : p.maxMessages + ' msg'}</strong> &nbsp;|&nbsp;
+            💾 Stockage : <strong>${p.maxStorageMB || 10} Mo</strong> &nbsp;|&nbsp;
+            🎙️ Vocal : <strong>${p.allowVoice ? 'Oui' : 'Non'}</strong> &nbsp;|&nbsp;
+            📸 Image : <strong>${p.allowImages ? 'Oui' : 'Non'}</strong>
+          </div>
+          <ul style="font-size:12px;color:var(--text);padding-left:16px;margin:8px 0 14px;">
+            ${(p.features || []).map(f => `<li>${escapeHtml(f)}</li>`).join('')}
+          </ul>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" style="flex:1;padding:7px;font-size:12px;" onclick="editAdminPlan('${escapeHtml(p.id)}')">✏️ Modifier</button>
+          <button class="btn btn-danger" style="padding:7px 11px;font-size:12px;" onclick="deleteAdminPlan('${escapeHtml(p.id)}', '${escapeHtml(p.name)}')">🗑️</button>
+        </div>
+      </div>
+    `).join('');
+    renderFeatureVisualList();
+  }
+
+  function editAdminPlan(planId) {
+    const p = cachedPlans.find(item => item.id === planId);
+    if (!p) return;
+    document.getElementById('plan-form-title').textContent = `✏️ Modification du forfait : ${p.name}`;
+    document.getElementById('plan-id').value = p.id;
+    document.getElementById('plan-name').value = p.name;
+    document.getElementById('plan-price').value = p.price;
+    document.getElementById('plan-period').value = p.period || 'FCFA / mois';
+    document.getElementById('plan-max-msg').value = p.maxMessages;
+    document.getElementById('plan-max-storage').value = p.maxStorageMB || 10;
+    document.getElementById('plan-catalog').checked = p.allowCatalog !== false;
+    document.getElementById('plan-templates').checked = p.allowTemplates !== false;
+    document.getElementById('plan-playground').checked = p.allowPlayground !== false;
+    document.getElementById('plan-crm').checked = p.allowCRM !== false;
+    document.getElementById('plan-human').checked = p.allowHumanTakeover !== false;
+    document.getElementById('plan-voice').checked = !!p.allowVoice;
+    document.getElementById('plan-images').checked = !!p.allowImages;
+    document.getElementById('plan-filter').checked = !!p.allowAdvancedFilter;
+    document.getElementById('plan-product-photos').checked = p.allowProductPhotos !== false;
+    document.getElementById('plan-popular').checked = !!p.isPopular;
+    document.getElementById('plan-features').value = (p.features || []).join('\n');
+    renderFeatureVisualList();
+    document.getElementById('plan-name').focus();
+  }
+
+  function resetPlanForm() {
+    document.getElementById('plan-form-title').textContent = '➕ Créer un nouveau forfait';
+    document.getElementById('plan-id').value = '';
+    document.getElementById('plan-name').value = '';
+    document.getElementById('plan-price').value = '';
+    document.getElementById('plan-period').value = 'FCFA / mois';
+    document.getElementById('plan-max-msg').value = 1000;
+    document.getElementById('plan-catalog').checked = true;
+    document.getElementById('plan-templates').checked = true;
+    document.getElementById('plan-playground').checked = true;
+    document.getElementById('plan-crm').checked = true;
+    document.getElementById('plan-human').checked = true;
+    document.getElementById('plan-voice').checked = true;
+    document.getElementById('plan-images').checked = true;
+    document.getElementById('plan-filter').checked = true;
+    document.getElementById('plan-popular').checked = false;
+    document.getElementById('plan-features').value = '';
+    renderFeatureVisualList();
+  }
+
+  function syncRealFeatureSwitch(cbEl, labelText) {
+    const list = getFeaturesArray();
+    const idx = list.indexOf(labelText);
+    if (cbEl.checked && idx === -1) {
+      list.push(labelText);
+    } else if (!cbEl.checked && idx >= 0) {
+      list.splice(idx, 1);
+    }
+    setFeaturesArray(list);
+  }
+
+  function getFeaturesArray() {
+    return document.getElementById('plan-features').value.split('\n').map(s => s.trim()).filter(Boolean);
+  }
+
+  function setFeaturesArray(arr) {
+    document.getElementById('plan-features').value = arr.join('\n');
+    renderFeatureVisualList();
+  }
+
+  function renderFeatureVisualList() {
+    const box = document.getElementById('plan-features-visual');
+    if (!box) return;
+    const list = getFeaturesArray();
+    if (list.length === 0) {
+      box.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 12px;background:#0a1218;border-radius:8px;border:1px dashed var(--border);">Aucune fonctionnalité dans la liste. Cliquez sur les boutons ci-dessus pour en ajouter.</div>';
+      return;
+    }
+    box.innerHTML = list.map((feat, idx) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;background:#0a1218;border:1px solid var(--border);padding:8px 12px;border-radius:10px;font-size:13px;">
+        <span>✅ ${escapeHtml(feat)}</span>
+        <button type="button" class="btn btn-danger" style="padding:4px 10px;font-size:11px;" onclick="removeFeatureAtIndex(${idx})">❌ Retirer</button>
+      </div>
+    `).join('');
+  }
+
+  function toggleFeatureLine(text) {
+    const list = getFeaturesArray();
+    const idx = list.indexOf(text);
+    if (idx >= 0) {
+      list.splice(idx, 1);
+    } else {
+      list.push(text);
+    }
+    setFeaturesArray(list);
+  }
+
+  function removeFeatureAtIndex(idx) {
+    const list = getFeaturesArray();
+    list.splice(idx, 1);
+    setFeaturesArray(list);
+  }
+
+  function addCustomFeatureInput() {
+    const inp = document.getElementById('custom-feature-input');
+    const val = inp.value.trim();
+    if (!val) return;
+    const list = getFeaturesArray();
+    list.push(val);
+    inp.value = '';
+    setFeaturesArray(list);
+  }
+
+  async function saveAdminPlan() {
+    const id = document.getElementById('plan-id').value.trim();
+    const name = document.getElementById('plan-name').value.trim();
+    const price = document.getElementById('plan-price').value.trim();
+    const period = document.getElementById('plan-period').value.trim() || 'FCFA / mois';
+    const maxMessages = Number(document.getElementById('plan-max-msg').value) || 500;
+    const maxStorageMB = Number(document.getElementById('plan-max-storage').value) || 10;
+    const allowCatalog = document.getElementById('plan-catalog').checked;
+    const allowTemplates = document.getElementById('plan-templates').checked;
+    const allowPlayground = document.getElementById('plan-playground').checked;
+    const allowCRM = document.getElementById('plan-crm').checked;
+    const allowHumanTakeover = document.getElementById('plan-human').checked;
+    const allowVoice = document.getElementById('plan-voice').checked;
+    const allowImages = document.getElementById('plan-images').checked;
+    const allowAdvancedFilter = document.getElementById('plan-filter').checked;
+    const allowProductPhotos = document.getElementById('plan-product-photos').checked;
+    const isPopular = document.getElementById('plan-popular').checked;
+    const features = document.getElementById('plan-features').value.split('\n').map(s => s.trim()).filter(Boolean);
+
+    if (!name || !price) return alert('Veuillez renseigner le nom et le prix du forfait.');
+
+    try {
+      const r = await fetch(`${API}/admin/plans`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: id || undefined, name, price, period, maxMessages, maxStorageMB,
+          allowCatalog, allowTemplates, allowPlayground, allowCRM, allowHumanTakeover,
+          allowVoice, allowImages, allowAdvancedFilter, allowProductPhotos, isPopular, features
+        })
+      });
+      const data = await r.json();
+      if (!r.ok) return showMsg('admin-alert', data.error || 'Erreur', 'error');
+      showMsg('admin-alert', '✅ ' + data.message, 'success');
+      resetPlanForm();
+      await loadAdminUsers();
+    } catch (e) {
+      showMsg('admin-alert', '❌ Erreur réseau', 'error');
+    }
+  }
+
+  async function deleteAdminPlan(id, name) {
+    if (!confirm(`Voulez-vous vraiment supprimer le forfait "${name}" ?`)) return;
+    try {
+      const r = await fetch(`${API}/admin/delete-plan`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      const data = await r.json();
+      if (!r.ok) return showMsg('admin-alert', data.error || 'Erreur', 'error');
+      showMsg('admin-alert', '🗑️ ' + data.message, 'success');
+      await loadAdminUsers();
+    } catch (e) {}
+  }
+
+  async function setCustomQuota(userId, email, currentMax) {
+    const val = prompt(`Combien de réponses IA voulez-vous attribuer à ${email} ?\n(Ex: 50, 100, 200...)`, currentMax < 99999 ? currentMax : 50);
+    if (!val) return;
+    const customMax = parseInt(val, 10);
+    if (isNaN(customMax) || customMax <= 0) return alert('Veuillez entrer un nombre valide supérieur à 0.');
+    await setUserPlan(userId, 'custom', customMax);
+  }
+
+  async function setCustomStorage(userId, email, currentStorageMB) {
+    const val = prompt(`Quel espace de stockage (en Mo) voulez-vous accorder à ${email} ?\n(Ex: 5, 10, 50, 100, 200 Mo)`, currentStorageMB || 10);
+    if (!val) return;
+    const customStorageMB = parseFloat(val);
+    if (isNaN(customStorageMB) || customStorageMB <= 0) return alert('Veuillez entrer un nombre de Mo valide supérieur à 0.');
+    try {
+      const r = await fetch(`${API}/admin/user-plan`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, planType: 'custom-storage', customStorageMB })
+      });
+      const data = await r.json();
+      if (!r.ok) return showMsg('admin-alert', data.error || 'Erreur', 'error');
+      showMsg('admin-alert', '✅ ' + data.message, 'success');
+      await loadAdminUsers();
+    } catch (e) {
+      showMsg('admin-alert', '❌ Erreur réseau', 'error');
+    }
+  }
+
+  async function setUserPlan(userId, planType, customMax) {
+    try {
+      const r = await fetch(`${API}/admin/user-plan`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, planType, customMax })
+      });
+      const data = await r.json();
+      if (!r.ok) return showMsg('admin-alert', data.error || 'Erreur', 'error');
+      showMsg('admin-alert', '✅ ' + data.message, 'success');
+      await loadAdminUsers();
+      await fetchStatusOnce();
+    } catch (e) {
+      showMsg('admin-alert', '❌ Erreur réseau', 'error');
+    }
+  }
+
+  async function deleteAdminUser(userId, email) {
+    if (!confirm(`Voulez-vous vraiment supprimer le compte ${email} et déconnecter son WhatsApp ?`)) return;
+    try {
+      const r = await fetch(`${API}/admin/delete-user`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      const data = await r.json();
+      if (!r.ok) return showMsg('admin-alert', data.error || 'Erreur', 'error');
+      showMsg('admin-alert', '🗑️ ' + data.message, 'success');
+      await loadAdminUsers();
+    } catch (e) {}
+  }
+
+  async function adminResetPassword(userId, email) {
+    const newPassword = prompt(`Entrez le nouveau mot de passe pour ${email} (6 caractères minimum) :`);
+    if (!newPassword) return;
+    if (newPassword.length < 6) return alert('Le mot de passe doit contenir au moins 6 caractères.');
+    try {
+      const r = await fetch(`${API}/admin/reset-user-password`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, newPassword })
+      });
+      const data = await r.json();
+      if (!r.ok) return showMsg('admin-alert', data.error || 'Erreur', 'error');
+      showMsg('admin-alert', '✅ ' + data.message, 'success');
+      await loadAdminUsers();
+    } catch (e) {}
+  }
+
   function showMsg(id, text, type) {
     const el = document.getElementById(id);
     if (!el) return;
     el.textContent = text;
     el.className = 'msg ' + type;
-    setTimeout(() => { if (el.className.includes(type)) el.className = 'msg'; }, 5000);
+    try { el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+    setTimeout(() => { if (el.className.includes(type)) el.className = 'msg'; }, 7000);
   }
 
   function escapeHtml(str) {
